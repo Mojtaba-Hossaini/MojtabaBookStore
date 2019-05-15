@@ -2,7 +2,7 @@
 {
     public class Author_Book
     {
-        public int Author_BookID { get; set; }
+        
         public int BookID { get; set; }
         public int AuthorID { get; set; }
 

@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MojtabaBookStore.Models
 {
-    [Table("BookInfo")]
+    
     public class Book
     {
-        [Key]
+        
         public int BookID { get; set; }
 
         [Required]
@@ -20,12 +16,14 @@ namespace MojtabaBookStore.Models
         public int Price { get; set; }
         public int Stock { get; set; }
         public string File { get; set; }
+        public int NumOfPages { get; set; }
+        public short Weight { get; set; }
+        public string ISBN { get; set; }
 
-        [Column(TypeName = "image")]
         public byte[] Image { get; set; }
         public int LanguageID { get; set; }
 
-        [ForeignKey("SubCategory")]
+        
         public int SCategoryID { get; set; }
 
         public SubCategory SubCategory { get; set; }
@@ -34,5 +32,6 @@ namespace MojtabaBookStore.Models
         public Discount Discount { get; set; }
         public List<Author_Book> Author_Books { get; set; }
         public List<Order_Book> Order_Books { get; set; }
+        public  Publisher Publisher { get; set; }
     }
 }
