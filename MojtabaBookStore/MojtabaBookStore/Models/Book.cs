@@ -24,14 +24,16 @@ namespace MojtabaBookStore.Models
         public int LanguageID { get; set; }
 
         
-        public int SCategoryID { get; set; }
+        [ForeignKey("Category")]
+        public int CategoryID { get; set; }
 
-        public SubCategory SubCategory { get; set; }
+        public Category Category { get; set; }
         public Language Language { get; set; }
 
         public Discount Discount { get; set; }
         public List<Author_Book> Author_Books { get; set; }
         public List<Order_Book> Order_Books { get; set; }
+        public List<Book_Translator> Book_Translators { get; set; }
         public  Publisher Publisher { get; set; }
     }
 }

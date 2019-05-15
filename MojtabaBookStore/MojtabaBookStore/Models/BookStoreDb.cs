@@ -20,19 +20,21 @@ namespace MojtabaBookStore.Models
             modelBuilder.ApplyConfiguration(new ProvinceConfig());
             modelBuilder.ApplyConfiguration(new Order_BookConfig());
             modelBuilder.ApplyConfiguration(new CategoryConfig());
+            modelBuilder.ApplyConfiguration(new Book_TranslatorConfig());
         }
-        DbSet<Book> Books { get; set; }
-        DbSet<Category> Categories { get; set; }
-        DbSet<SubCategory> SubCategories { get; set; }
-        DbSet<Order> Orders { get; set; }
-        DbSet<Author> Authors { get; set; }
-        DbSet<City> Cities { get; set; }
-        DbSet<Province> Provices { get; set; }
-        DbSet<Author_Book> Author_Books { get; set; }
-        DbSet<Order_Book> Order_Books { get; set; }
-        DbSet<Language> Languages { get; set; }
-        DbSet<Discount> Discounts { get; set; }
-        DbSet<OrderStatus> OrderStatuses { get; set; }
-        DbSet<Customer> Customers { get; set; }
+        public DbSet<Book> Books { get; set; }
+        public DbSet<Category> Categories { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<Author> Authors { get; set; }
+        public DbSet<City> Cities { get; set; }
+        public DbSet<Province> Provices { get; set; }
+        public DbSet<Author_Book> Author_Books { get; set; }
+        public DbSet<Order_Book> Order_Books { get; set; }
+        public DbSet<Language> Languages { get; set; }
+        public DbSet<Discount> Discounts { get; set; }
+        public DbSet<OrderStatus> OrderStatuses { get; set; }
+        public DbSet<Customer> Customers { get; set; }
+        public DbSet<Translator> Translators { get; set; }
+        public DbSet<Book_Translator> Book_Translators { get; set; }
     }
 }

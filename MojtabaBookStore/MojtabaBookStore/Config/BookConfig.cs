@@ -18,10 +18,7 @@ namespace MojtabaBookStore.Config
                .WithOne(t => t.Book)
                .HasForeignKey<Discount>(p => p.BookID);
 
-            builder
-               .HasOne(p => p.SubCategory)
-               .WithMany(t => t.Books)
-               .HasForeignKey(f => f.SCategoryID);
+            
         }
     }
 }
