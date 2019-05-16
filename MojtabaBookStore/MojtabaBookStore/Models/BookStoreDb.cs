@@ -21,6 +21,7 @@ namespace MojtabaBookStore.Models
             modelBuilder.ApplyConfiguration(new Order_BookConfig());
             modelBuilder.ApplyConfiguration(new CategoryConfig());
             modelBuilder.ApplyConfiguration(new Book_TranslatorConfig());
+            modelBuilder.ApplyConfiguration(new Book_CategoryConfig());
         }
         public DbSet<Book> Books { get; set; }
         public DbSet<Category> Categories { get; set; }

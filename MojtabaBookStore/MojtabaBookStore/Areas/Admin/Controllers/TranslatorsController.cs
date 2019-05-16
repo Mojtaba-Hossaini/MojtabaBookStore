@@ -39,5 +39,58 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
             }
             return View(translator);
         }
+
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null)
+                return NotFound();
+            var translator = await context.Translators.FindAsync(id);
+            if (translator == null)
+                return NotFound();
+            return View(translator);
+
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(Translator translator)
+        {
+            if (ModelState.IsValid)
+            {
+                context.Update(translator);
+                await context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            return View(translator);
+        }
+
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+                return NotFound();
+
+            var translator = await context.Translators.FindAsync(id);
+            if (translator == null)
+                return NotFound();
+
+            return View(translator);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Deleted(int? id)
+        {
+            if (id == null)
+                return NotFound();
+
+            var translator = await context.Translators.FindAsync(id);
+            if (translator != null)
+            {
+                context.Translators.Remove(translator);
+                await context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            return NotFound();
+        }
     }
 }

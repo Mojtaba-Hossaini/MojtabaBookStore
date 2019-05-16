@@ -13,6 +13,7 @@ namespace MojtabaBookStore.Models
         public int? ParentCategoryID { get; set; }
         public Category category { get; set; }
         public List<Category> Categories { get; set; }
+        public List<Book_Category> Book_Categories { get; set; }
 
     }
 }

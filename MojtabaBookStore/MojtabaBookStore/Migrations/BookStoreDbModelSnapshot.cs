@@ -53,8 +53,6 @@ namespace MojtabaBookStore.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int>("CategoryID");
-
                     b.Property<string>("File");
 
                     b.Property<string>("ISBN");
@@ -62,11 +60,19 @@ namespace MojtabaBookStore.Migrations
                     b.Property<byte[]>("Image")
                         .HasColumnType("image");
 
+                    b.Property<bool?>("IsDeleted");
+
+                    b.Property<bool?>("IsPublished");
+
                     b.Property<int>("LanguageID");
 
                     b.Property<int>("NumOfPages");
 
                     b.Property<int>("Price");
+
+                    b.Property<DateTime?>("PublishDate");
+
+                    b.Property<int>("PublishYear");
 
                     b.Property<int?>("PublisherID");
 
@@ -81,13 +87,24 @@ namespace MojtabaBookStore.Migrations
 
                     b.HasKey("BookID");
 
-                    b.HasIndex("CategoryID");
-
                     b.HasIndex("LanguageID");
 
                     b.HasIndex("PublisherID");
 
                     b.ToTable("BookInfo");
+                });
+
+            modelBuilder.Entity("MojtabaBookStore.Models.Book_Category", b =>
+                {
+                    b.Property<int>("BookID");
+
+                    b.Property<int>("CategoryID");
+
+                    b.HasKey("BookID", "CategoryID");
+
+                    b.HasIndex("CategoryID");
+
+                    b.ToTable("Book_Category");
                 });
 
             modelBuilder.Entity("MojtabaBookStore.Models.Book_Translator", b =>
@@ -298,9 +315,11 @@ namespace MojtabaBookStore.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("Family");
+                    b.Property<string>("Family")
+                        .IsRequired();
 
-                    b.Property<string>("Name");
+                    b.Property<string>("Name")
+                        .IsRequired();
 
                     b.HasKey("TranslatorID");
 
@@ -322,11 +341,6 @@ namespace MojtabaBookStore.Migrations
 
             modelBuilder.Entity("MojtabaBookStore.Models.Book", b =>
                 {
-                    b.HasOne("MojtabaBookStore.Models.Category", "Category")
-                        .WithMany()
-                        .HasForeignKey("CategoryID")
-                        .OnDelete(DeleteBehavior.Cascade);
-
                     b.HasOne("MojtabaBookStore.Models.Language", "Language")
                         .WithMany("Books")
                         .HasForeignKey("LanguageID")
@@ -335,6 +349,19 @@ namespace MojtabaBookStore.Migrations
                     b.HasOne("MojtabaBookStore.Models.Publisher", "Publisher")
                         .WithMany("Books")
                         .HasForeignKey("PublisherID");
+                });
+
+            modelBuilder.Entity("MojtabaBookStore.Models.Book_Category", b =>
+                {
+                    b.HasOne("MojtabaBookStore.Models.Book", "Book")
+                        .WithMany("Book_Categories")
+                        .HasForeignKey("BookID")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("MojtabaBookStore.Models.Category", "Category")
+                        .WithMany("Book_Categories")
+                        .HasForeignKey("CategoryID")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("MojtabaBookStore.Models.Book_Translator", b =>
