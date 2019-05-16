@@ -9,9 +9,9 @@ namespace MojtabaBookStore.Config
     {
         public void Configure(EntityTypeBuilder<Book_Translator> builder)
         {
-            builder.HasKey(k => new { k.BookID, k.TranslatroID });
+            builder.HasKey(k => new { k.BookID, k.TranslatorID });
             builder.HasOne(b => b.Book).WithMany(b => b.Book_Translators).HasForeignKey(f => f.BookID);
-            builder.HasOne(b => b.Translator).WithMany(b => b.Book_Translators).HasForeignKey(f => f.TranslatroID);
+            builder.HasOne(b => b.Translator).WithMany(b => b.Book_Translators).HasForeignKey(f => f.TranslatorID);
         }
     }
 }

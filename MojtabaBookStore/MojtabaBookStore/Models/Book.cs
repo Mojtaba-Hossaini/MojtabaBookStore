@@ -24,6 +24,7 @@ namespace MojtabaBookStore.Models
         public DateTime? PublishDate { get; set; }
         public int PublishYear { get; set; }
         public bool? IsDeleted { get; set; }
+        public int PublisherID { get; set; }
 
         public byte[] Image { get; set; }
         public int LanguageID { get; set; }

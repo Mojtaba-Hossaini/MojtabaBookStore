@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Localization;
 using MojtabaBookStore.Models;
 using MojtabaBookStore.Models.Repository;
 
@@ -38,7 +39,14 @@ namespace MojtabaBookStore
 
             services.AddTransient<BooksRepository>();
             services.AddDbContext<BookStoreDb>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddMvc(options =>
+            {
+                var F = services.BuildServiceProvider().GetService<IStringLocalizerFactory>();
+                var L = F.Create("ModelBindingMessages", "BookStoreDb");
+                options.ModelBindingMessageProvider.SetValueMustNotBeNullAccessor(
+                 (x) => L["انتخاب یکی از موارد لیست الزامی است."]);
+
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -8,7 +8,7 @@ namespace MojtabaBookStore.Models
 {
     public class Book_Translator
     {
-        public int TranslatroID { get; set; }
+        public int TranslatorID { get; set; }
         public int BookID { get; set; }
         public Book Book { get; set; }
         public Translator Translator { get; set; }
