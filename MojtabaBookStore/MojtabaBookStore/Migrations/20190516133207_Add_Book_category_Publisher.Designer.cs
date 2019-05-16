@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MojtabaBookStore.Models;
 
 namespace MojtabaBookStore.Migrations
 {
     [DbContext(typeof(BookStoreDb))]
-    partial class BookStoreDbModelSnapshot : ModelSnapshot
+    [Migration("20190516133207_Add_Book_category_Publisher")]
+    partial class Add_Book_category_Publisher
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

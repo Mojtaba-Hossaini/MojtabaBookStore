@@ -13,6 +13,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using MojtabaBookStore.Models;
+using MojtabaBookStore.Models.Repository;
 
 namespace MojtabaBookStore
 {
@@ -35,6 +36,7 @@ namespace MojtabaBookStore
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
+            services.AddTransient<BooksRepository>();
             services.AddDbContext<BookStoreDb>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
@@ -54,11 +56,7 @@ namespace MojtabaBookStore
             }
 
             app.UseHttpsRedirection();
-            app.UseStaticFiles(new StaticFileOptions
-            {
-                FileProvider = new PhysicalFileProvider(Path.Combine(env.ContentRootPath, "node_modules")),
-                RequestPath = "/" + "node_modules",
-            });
+            app.UseStaticFiles();
             app.UseCookiePolicy();
 
             app.UseMvc(routes =>

@@ -36,6 +36,8 @@ namespace MojtabaBookStore.Models
         public DbSet<OrderStatus> OrderStatuses { get; set; }
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Translator> Translators { get; set; }
+        public DbSet<Publisher> Publishers { get; set; }
         public DbSet<Book_Translator> Book_Translators { get; set; }
+        public DbSet<Book_Category> Book_Categories { get; set; }
     }
 }
