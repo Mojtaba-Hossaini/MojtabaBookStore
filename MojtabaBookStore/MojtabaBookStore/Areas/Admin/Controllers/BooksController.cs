@@ -23,7 +23,39 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
         }
         public IActionResult Index()
         {
-            return View();
+
+            var books = context.Books.Join(context.Publishers, p => p.PublisherID, c => c.PublisherID, (p, c) => new
+            {
+                p,c
+            }).Join(context.Author_Books, a => a.p.BookID, b => b.BookID, (a, b) => new
+            {
+                a,b
+            }).Join(context.Authors, u => u.b.AuthorID, f => f.AuthorID, (u, f) => new BooksIndexViewModel
+            {
+                BookID = u.a.p.BookID,
+                ISBN = u.a.p.ISBN,
+                IsPublish = u.a.p.IsPublished,
+                Price = u.a.p.Price,
+                PublishDate = u.a.p.PublishDate,
+                Stock = u.a.p.Stock,
+                Title = u.a.p.Title,
+                PublisherName = u.a.c.PublisherName,
+                Author = f.FirstName + " " + f.LastName
+
+            }).ToList();
+
+            //var books = context.Books.Join(context.Publishers, p => p.PublisherID, c => c.PublisherID, (p, c) => new BooksIndexViewModel
+            //{
+            //    BookID = p.BookID,
+            //    ISBN = p.ISBN,
+            //    IsPublish = p.IsPublished,
+            //    Price = p.Price,
+            //    PublishDate = p.PublishDate,
+            //    Stock = p.Stock,
+            //    Title = p.Title,
+            //    PublisherName = c.PublisherName
+            //}).ToList();
+            return View(books);
         }
 
         public IActionResult Create()

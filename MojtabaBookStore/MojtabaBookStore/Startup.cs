@@ -39,14 +39,7 @@ namespace MojtabaBookStore
 
             services.AddTransient<BooksRepository>();
             services.AddDbContext<BookStoreDb>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-            services.AddMvc(options =>
-            {
-                var F = services.BuildServiceProvider().GetService<IStringLocalizerFactory>();
-                var L = F.Create("ModelBindingMessages", "BookStoreDb");
-                options.ModelBindingMessageProvider.SetValueMustNotBeNullAccessor(
-                 (x) => L["انتخاب یکی از موارد لیست الزامی است."]);
-
-            });
+            services.AddMvc();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
