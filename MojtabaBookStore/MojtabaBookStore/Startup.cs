@@ -15,6 +15,7 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Localization;
 using MojtabaBookStore.Models;
 using MojtabaBookStore.Models.Repository;
+using MojtabaBookStore.Services;
 
 namespace MojtabaBookStore
 {
@@ -37,6 +38,7 @@ namespace MojtabaBookStore
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
+            services.AddTransient<ConvertDate>();
             services.AddTransient<BooksRepository>();
             services.AddDbContext<BookStoreDb>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddMvc();

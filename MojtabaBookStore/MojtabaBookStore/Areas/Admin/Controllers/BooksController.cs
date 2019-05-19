@@ -4,9 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using MojtabaBookStore.Models;
 using MojtabaBookStore.Models.Repository;
 using MojtabaBookStore.Models.ViewModels;
+using ReflectionIT.Mvc.Paging;
 
 namespace MojtabaBookStore.Areas.Admin.Controllers
 {
@@ -21,30 +23,44 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
             this.context = context;
             this.repo = repo;
         }
-        public IActionResult Index()
+        public IActionResult Index(int page = 1)
         {
             string autherNames = "";
             List<BooksIndexViewModel> viewModel = new List<BooksIndexViewModel>();
 
-            var books = context.Books.Join(context.Publishers, p => p.PublisherID, c => c.PublisherID, (p, c) => new
-            {
-                p,c
-            }).Join(context.Author_Books, a => a.p.BookID, b => b.BookID, (a, b) => new
-            {
-                a,b
-            }).Join(context.Authors, u => u.b.AuthorID, f => f.AuthorID, (u, f) => new BooksIndexViewModel
-            {
-                BookID = u.a.p.BookID,
-                ISBN = u.a.p.ISBN,
-                IsPublish = u.a.p.IsPublished,
-                Price = u.a.p.Price,
-                PublishDate = u.a.p.PublishDate,
-                Stock = u.a.p.Stock,
-                Title = u.a.p.Title,
-                PublisherName = u.a.c.PublisherName,
-                Author = f.FirstName + " " + f.LastName
+            //var books = context.Books.Join(context.Publishers, p => p.PublisherID, c => c.PublisherID, (p, c) => new
+            //{
+            //    p,c
+            //}).Join(context.Author_Books, a => a.p.BookID, b => b.BookID, (a, b) => new
+            //{
+            //    a,b
+            //}).Join(context.Authors, u => u.b.AuthorID, f => f.AuthorID, (u, f) => new BooksIndexViewModel
+            //{
+            //    BookID = u.a.p.BookID,
+            //    ISBN = u.a.p.ISBN,
+            //    IsPublish = u.a.p.IsPublished,
+            //    Price = u.a.p.Price,
+            //    PublishDate = u.a.p.PublishDate,
+            //    Stock = u.a.p.Stock,
+            //    Title = u.a.p.Title,
+            //    PublisherName = u.a.c.PublisherName,
+            //    Author = f.FirstName + " " + f.LastName
 
-            }).GroupBy(b => b.BookID).Select(g => new { BookID = g.Key,BookGroups = g}).ToList();
+            //}).GroupBy(b => b.BookID).Select(g => new { BookID = g.Key,BookGroups = g}).ToList();
+
+            var books = context.Author_Books.Include(b => b.Book).ThenInclude(p => p.Publisher).Include(a => a.Author).Where(c => c.Book.IsDeleted == false).Select(c => new
+            {
+                Author = c.Author.FirstName + " " + c.Author.LastName,
+                c.BookID,
+                c.Book.ISBN,
+                c.Book.IsPublished,
+                c.Book.Price,
+                c.Book.PublishDate,
+                c.Book.Publisher.PublisherName,
+                c.Book.Stock,
+                c.Book.Title
+
+            }).GroupBy(b => b.BookID).Select(g => new { BookID = g.Key, BookGroups = g }).ToList();
 
             foreach (var item in books)
             {
@@ -63,7 +79,7 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
                     ISBN = item.BookGroups.First().ISBN,
                     Title = item.BookGroups.First().Title,
                     Price = item.BookGroups.First().Price,
-                    IsPublish = item.BookGroups.First().IsPublish,
+                    IsPublish = item.BookGroups.First().IsPublished,
                     PublishDate = item.BookGroups.First().PublishDate,
                     PublisherName = item.BookGroups.First().PublisherName,
                     Stock = item.BookGroups.First().Stock,
@@ -82,7 +98,9 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
             //    Title = p.Title,
             //    PublisherName = c.PublisherName
             //}).ToList();
-            return View(viewModel);
+
+            var pagingModel = PagingList.Create(viewModel, 5, page);
+            return View(pagingModel);
         }
 
         public IActionResult Create()
