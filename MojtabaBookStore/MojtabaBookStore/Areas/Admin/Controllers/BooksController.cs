@@ -23,6 +23,8 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
         }
         public IActionResult Index()
         {
+            string autherNames = "";
+            List<BooksIndexViewModel> viewModel = new List<BooksIndexViewModel>();
 
             var books = context.Books.Join(context.Publishers, p => p.PublisherID, c => c.PublisherID, (p, c) => new
             {
@@ -42,7 +44,32 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
                 PublisherName = u.a.c.PublisherName,
                 Author = f.FirstName + " " + f.LastName
 
-            }).ToList();
+            }).GroupBy(b => b.BookID).Select(g => new { BookID = g.Key,BookGroups = g}).ToList();
+
+            foreach (var item in books)
+            {
+                autherNames = "";
+                foreach (var group in item.BookGroups)
+                {
+                    if (autherNames == "")
+                        autherNames = group.Author;
+                    else
+                        autherNames = autherNames + " - " + group.Author;
+                }
+                BooksIndexViewModel vm = new BooksIndexViewModel()
+                {
+                    Author = autherNames,
+                    BookID = item.BookID,
+                    ISBN = item.BookGroups.First().ISBN,
+                    Title = item.BookGroups.First().Title,
+                    Price = item.BookGroups.First().Price,
+                    IsPublish = item.BookGroups.First().IsPublish,
+                    PublishDate = item.BookGroups.First().PublishDate,
+                    PublisherName = item.BookGroups.First().PublisherName,
+                    Stock = item.BookGroups.First().Stock,
+                };
+                viewModel.Add(vm);
+            }
 
             //var books = context.Books.Join(context.Publishers, p => p.PublisherID, c => c.PublisherID, (p, c) => new BooksIndexViewModel
             //{
@@ -55,7 +82,7 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
             //    Title = p.Title,
             //    PublisherName = c.PublisherName
             //}).ToList();
-            return View(books);
+            return View(viewModel);
         }
 
         public IActionResult Create()
