@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using MojtabaBookStore.Models;
 using MojtabaBookStore.Models.Repository;
@@ -23,10 +24,13 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
             this.context = context;
             this.repo = repo;
         }
-        public IActionResult Index(int page = 1)
+        public IActionResult Index(int page = 1,int row = 5)
         {
             string autherNames = "";
             List<BooksIndexViewModel> viewModel = new List<BooksIndexViewModel>();
+            List<int> rows = new List<int> { 5,10,15,20,50,100};
+            ViewBag.RowID = new SelectList(rows,row);
+            ViewBag.NumOfPage = (page - 1) * row + 1;
 
             //var books = context.Books.Join(context.Publishers, p => p.PublisherID, c => c.PublisherID, (p, c) => new
             //{
@@ -99,7 +103,8 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
             //    PublisherName = c.PublisherName
             //}).ToList();
 
-            var pagingModel = PagingList.Create(viewModel, 5, page);
+            var pagingModel = PagingList.Create(viewModel, row, page);
+            pagingModel.RouteValue = new RouteValueDictionary { {"row",row } };
             return View(pagingModel);
         }
 
