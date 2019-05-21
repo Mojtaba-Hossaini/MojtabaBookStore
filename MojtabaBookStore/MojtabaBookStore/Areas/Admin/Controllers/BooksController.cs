@@ -24,13 +24,15 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
             this.context = context;
             this.repo = repo;
         }
-        public IActionResult Index(int page = 1,int row = 5)
+        public IActionResult Index(int page = 1,int row = 5, string sortExpression = "Title", string title = "")
         {
             string autherNames = "";
+            title = string.IsNullOrEmpty(title) ? "" : title;
             List<BooksIndexViewModel> viewModel = new List<BooksIndexViewModel>();
             List<int> rows = new List<int> { 5,10,15,20,50,100};
             ViewBag.RowID = new SelectList(rows,row);
-            ViewBag.NumOfPage = (page - 1) * row + 1;
+            ViewBag.NumOfRow = (page - 1) * row + 1;
+            ViewBag.Search = title;
 
             //var books = context.Books.Join(context.Publishers, p => p.PublisherID, c => c.PublisherID, (p, c) => new
             //{
@@ -52,7 +54,7 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
 
             //}).GroupBy(b => b.BookID).Select(g => new { BookID = g.Key,BookGroups = g}).ToList();
 
-            var books = context.Author_Books.Include(b => b.Book).ThenInclude(p => p.Publisher).Include(a => a.Author).Where(c => c.Book.IsDeleted == false).Select(c => new
+            var books = context.Author_Books.Include(b => b.Book).ThenInclude(p => p.Publisher).Include(a => a.Author).Where(c => c.Book.IsDeleted == false && c.Book.Title.Contains(title.Trim())).Select(c => new
             {
                 Author = c.Author.FirstName + " " + c.Author.LastName,
                 c.BookID,
@@ -103,8 +105,14 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
             //    PublisherName = c.PublisherName
             //}).ToList();
 
-            var pagingModel = PagingList.Create(viewModel, row, page);
-            pagingModel.RouteValue = new RouteValueDictionary { {"row",row } };
+            var pagingModel = PagingList.Create(viewModel, row, page,sortExpression,"Title");
+            pagingModel.RouteValue = new RouteValueDictionary { {"row",row }, { "title", title} };
+            ViewBag.Categories = repo.GetAllCategories();
+            ViewBag.LanguageID = new SelectList(context.Languages, "LanguageID", "LanguageName");
+            ViewBag.PublisherID = new SelectList(context.Publishers, "PublisherID", "PublisherName");
+            ViewBag.AuthorID = new SelectList(context.Authors.Select(c => new AuthorList { AuthorID = c.AuthorID, NameFamily = c.FirstName + " " + c.LastName }), "AuthorID", "NameFamily");
+            ViewBag.TranslatorID = new SelectList(context.Translators.Select(c => new TranslatorList { TranslatorID = c.TranslatorID, NameFamily = c.Name + " " + c.Family }), "TranslatorID", "NameFamily");
+
             return View(pagingModel);
         }
 
@@ -112,8 +120,8 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
         {
             var categoris = context.Categories.Where(c => c.ParentCategoryID == null).Select(c => new TreeViewCategory
             {
-                CategoryID = c.CategoryID,
-                CategoryName = c.CategoryName
+                id = c.CategoryID,
+                title = c.CategoryName
             }).ToList();
 
             foreach (var item in categoris)

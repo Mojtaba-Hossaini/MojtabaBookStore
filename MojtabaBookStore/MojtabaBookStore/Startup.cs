@@ -16,6 +16,7 @@ using Microsoft.Extensions.Localization;
 using MojtabaBookStore.Models;
 using MojtabaBookStore.Models.Repository;
 using MojtabaBookStore.Services;
+using ReflectionIT.Mvc.Paging;
 
 namespace MojtabaBookStore
 {
@@ -42,6 +43,11 @@ namespace MojtabaBookStore
             services.AddTransient<BooksRepository>();
             services.AddDbContext<BookStoreDb>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddMvc();
+            services.AddPaging(options => {
+                options.ViewName = "Bootstrap4";
+                options.HtmlIndicatorDown = "<i class='fa fa-sort-amount-down'></i>";
+                options.HtmlIndicatorUp = "<i class='fa fa-sort-amount-up'></i>";
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

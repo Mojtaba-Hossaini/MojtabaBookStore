@@ -12,20 +12,20 @@
                 لیست کتاب ها
             </div>
             <div class="card-body">
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <div class="input-group">
-                            <span class="input-group-btn">
-                                <button type="button" class="btn btn-primary"><i class="fa fa-search"></i> جستجو</button>
-                            </span>
-                            <input id="input-group-1" name="input1-group2" class="form-control" placeholder="عنوان کتاب را واردکنید ..." type="text">
+                <form>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="input-group">
+                                <span class="input-group-btn">
+                                    <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> جستجو</button>
+                                </span>
+                                <input id="input-group-1" name="title" class="form-control" placeholder="عنوان کتاب را واردکنید ..." type="text">
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-md-4">
-                        <form class="px-3">
+                        <div class="col-md-4">
                             <div class="row form-group">
                                 <label class="ml-2">تعداد ردیف</label>
-                                <div class="col-md-4 form-group padding-0px">
+                                <div class="col-md-4 padding-0px">
                                     <select class="select2" name="row" asp-items="@ViewBag.RowID"></select>
                                 </div>
                                 <div class="col-md-3 padding-0px">
@@ -33,10 +33,18 @@
                                 </div>
 
                             </div>
-                        </form>
+                        </div>
+                        @if (ViewBag.Search != "")
+                        {
+                            <div class="col-md-4">
+                                <a href="/Admin/Books/Index" class="float-left"><i class="fa fa-arrow-circle-left">بازگشت به لیست کتاب ها</i></a>
+                            </div>
+                        }
+
                     </div>
-                </div>
-                
+                </form>
+
+
                 <p>
                     <a class="btn btn-primary btn-block" data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
                         جستجوی پیشرفته کتاب
@@ -49,58 +57,51 @@
                                 <div class="col-md-3">
                                     <div class="form-group">
                                         <label class="form-control-label">عنوان</label>
-                                        <input class="form-control" placeholder="عنوان">
+                                        <input class="form-control" name="Title" placeholder="عنوان">
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
                                         <label class="form-control-label">شابک</label>
-                                        <input class="form-control" placeholder="شابک">
+                                        <input class="form-control" name="ISBN" placeholder="شابک">
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
                                         <label class="form-control-label">زبان</label>
-                                        <select class="select2 js-states form-control">
-                                            <option>فارسی</option>
-                                            <option>عربی</option>
-                                            <option>purple</option>
+                                        <select class="select2 js-states form-control" name="Language" asp-items="ViewBag.LanguageID">
+                                            <option>همه زبان ها</option>
                                         </select>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
                                         <label class="form-control-label">دسته بندی</label>
-                                        <select class="select2 js-states form-control">
-                                            <option>فارسی</option>
-                                            <option>عربی</option>
-                                        </select>
+                                        <input type="text" id="justAnotherInputBox" name="Category" placeholder="جستجو کنید" />
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
                                         <label class="form-control-label">نویسنده</label>
-                                        <select class="select2 js-states form-control">
-                                            <option>مجتبی حسینی</option>
-                                            <option>مریم رمضانی</option>
+                                        <select class="select2 js-states form-control" name="Author" asp-items="ViewBag.AuthorID">
+                                            <option>همه نویسنده ها</option>
                                         </select>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
                                         <label class="form-control-label">مترجم</label>
-                                        <select class="select2 js-states form-control">
-                                            <option>مجتبی حسینی</option>
-                                            <option>مریم رمضانی</option>
+                                        <select class="select2 js-states form-control" name="Translator" asp-items="ViewBag.TranslatorID">
+                                            <option>همه مترجم ها</option>
+                                            <
                                         </select>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
                                         <label class="form-control-label">ناشر</label>
-                                        <select class="select2 js-states form-control">
-                                            <option>انتشارات نشر نو</option>
-
+                                        <select class="select2 js-states form-control" name="Publisher" asp-items="ViewBag.PublisherID">
+                                            <option>همه ناشر ها</option>    
                                         </select>
                                     </div>
                                 </div>
@@ -116,19 +117,19 @@
                         <thead>
                             <tr>
                                 <th>ردیف</th>
-                                <th>عنوان</th>
-                                <th>نویسندگان</th>
-                                <th>شابک</th>
-                                <th>موجودی</th>
-                                <th>ناشر</th>
-                                <th class="text-center">قیمت (ریال)</th>
-                                <th class="text-center">تاریخ انتشار در سایت</th>
-                                <th style="width:25px;">وضعیت</th>
+                                <th>@Html.SortableHeaderFor(model => model.Title, "Title")</th>
+                                <th>@Html.SortableHeaderFor(model => model.Author, "Author")</th>
+                                <th>@Html.SortableHeaderFor(model => model.ISBN, "ISBN")</th>
+                                <th>@Html.SortableHeaderFor(model => model.Stock, "Stock")</th>
+                                <th>@Html.SortableHeaderFor(model => model.PublisherName, "PublisherName")</th>
+                                <th class="text-center">@Html.SortableHeaderFor(model => model.Price, "Price")</th>
+                                <th class="text-center">@Html.SortableHeaderFor(model => model.PublishDate, "PublishDate")</th>
+                                <th style="width:25px;">@Html.SortableHeaderFor(model => model.IsPublish, "IsPublish")</th>
                                 <th>عملیات</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @{int i = ViewBag.NumOfPage;}
+                            @{int i = ViewBag.NumOfRow;}
                             @foreach (var item in Model)
                             {
                                 <tr>
@@ -142,7 +143,7 @@
                                     <td class="text-center">
                                         @if (item.PublishDate != null)
                                         {
-                                            @convertDate.MiladiToShamsi((DateTime)item.PublishDate,"yyyy/MM/dd")
+                                            @convertDate.MiladiToShamsi((DateTime)item.PublishDate, "yyyy/MM/dd")
                                         }
                                         else
                                         {
@@ -174,12 +175,23 @@
                     </table>
 
                     <nav>
-                        @await this.Component.InvokeAsync("Pager", new { PagingList = this.Model})
+                        @await this.Component.InvokeAsync("Pager", new { PagingList = this.Model })
                     </nav>
-                    
+
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script type="text/javascript">
+    var SampleJSONData = @Html.Raw(Json.Serialize(ViewBag.Categories));
+    var comboTree2;
+
+jQuery(document).ready(function($) {
+		comboTree2 = $('#justAnotherInputBox').comboTree({
+			source : SampleJSONData,
+			isMultiple: false
+		});
+});</script>
 

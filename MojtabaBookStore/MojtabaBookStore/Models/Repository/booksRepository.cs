@@ -20,8 +20,8 @@ namespace MojtabaBookStore.Models.Repository
         {
             var categoris = context.Categories.Where(c => c.ParentCategoryID == null).Select(c => new TreeViewCategory
             {
-                CategoryID = c.CategoryID,
-                CategoryName = c.CategoryName
+                id = c.CategoryID,
+                title = c.CategoryName
             }).ToList();
 
             foreach (var item in categoris)
@@ -33,16 +33,16 @@ namespace MojtabaBookStore.Models.Repository
         }
         public void BindSubCategories(TreeViewCategory category)
         {
-            var subCategoris = context.Categories.Where(c => c.ParentCategoryID == category.CategoryID).Select(c => new TreeViewCategory
+            var subCategoris = context.Categories.Where(c => c.ParentCategoryID == category.id).Select(c => new TreeViewCategory
             {
-                CategoryID = c.CategoryID,
-                CategoryName = c.CategoryName
+                id = c.CategoryID,
+                title = c.CategoryName
             }).ToList();
 
             foreach (var item in subCategoris)
             {
                 BindSubCategories(item);
-                category.SubCategories.Add(item);
+                category.subs.Add(item);
             }
         }
     }

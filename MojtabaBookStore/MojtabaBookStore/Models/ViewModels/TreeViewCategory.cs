@@ -6,10 +6,10 @@ namespace MojtabaBookStore.Models.ViewModels
     {
         public TreeViewCategory()
         {
-            SubCategories = new List<TreeViewCategory>();
+            subs = new List<TreeViewCategory>();
         }
-        public int CategoryID { get; set; }
-        public string CategoryName { get; set; }
-        public List<TreeViewCategory> SubCategories { get; set; }
+        public int id { get; set; }
+        public string title { get; set; }
+        public List<TreeViewCategory> subs { get; set; }
     }
 }
