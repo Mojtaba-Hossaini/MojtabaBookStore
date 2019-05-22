@@ -50,6 +50,8 @@ namespace MojtabaBookStore.Models.Repository
         public List<BooksIndexViewModel> GetAllBooks(string title, string ISBN, string Language, string Publisher, string Author, string Translator, string Category)
         {
             string autherNames = "";
+            string trnaslatorsName = "";
+            string categoriesName = "";
             List<BooksIndexViewModel> viewModel = new List<BooksIndexViewModel>();
             List<int> rows = new List<int> { 5, 10, 15, 20, 50, 100 };
 
@@ -106,12 +108,28 @@ namespace MojtabaBookStore.Models.Repository
             foreach (var item in books)
             {
                 autherNames = "";
-                foreach (var group in item.BookGroups)
+                trnaslatorsName = "";
+                categoriesName = "";
+                foreach (var group in item.BookGroups.Select(a => a.Author).Distinct())
                 {
                     if (autherNames == "")
-                        autherNames = group.Author;
+                        autherNames = group;
                     else
-                        autherNames = autherNames + " - " + group.Author;
+                        autherNames = autherNames + " - " + group;
+                }
+                foreach (var group in item.BookGroups.Select(a => a.Translator).Distinct())
+                {
+                    if (trnaslatorsName == "")
+                        trnaslatorsName = group;
+                    else
+                        trnaslatorsName = trnaslatorsName + " - " + group;
+                }
+                foreach (var group in item.BookGroups.Select(a => a.Category).Distinct())
+                {
+                    if (categoriesName == "")
+                        categoriesName = group;
+                    else
+                        categoriesName = categoriesName + " - " + group;
                 }
                 BooksIndexViewModel vm = new BooksIndexViewModel()
                 {
@@ -124,6 +142,9 @@ namespace MojtabaBookStore.Models.Repository
                     PublishDate = item.BookGroups.First().PublishDate,
                     PublisherName = item.BookGroups.First().PublisherName,
                     Stock = item.BookGroups.First().Stock,
+                    Translator = trnaslatorsName,
+                    Category = categoriesName,
+                    Language = item.BookGroups.First().LanguageName,
                 };
                 viewModel.Add(vm);
             }

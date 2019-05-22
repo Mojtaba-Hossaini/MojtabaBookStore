@@ -175,5 +175,20 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
             }
         }
 
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null)
+                return NotFound();
+
+            var bookInfo = await context.Books.Where(c => c.BookID == id).Include(l => l.Language).Include(p => p.Publisher).FirstOrDefaultAsync();
+            ViewBag.Authors = context.Author_Books.Where(c => c.BookID == id).Include(a => a.Author).Select(c => new Author {
+                AuthorID = c.AuthorID,
+                FirstName = c.Author.FirstName,
+                LastName = c.Author.LastName
+            }).ToList();
+            return View(bookInfo);
+            
+        }
+
     }
 }
