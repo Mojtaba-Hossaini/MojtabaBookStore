@@ -42,7 +42,14 @@ namespace MojtabaBookStore
             services.AddTransient<ConvertDate>();
             services.AddTransient<BooksRepository>();
             services.AddDbContext<BookStoreDb>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-            services.AddMvc();
+            services.AddMvc(options =>
+            {
+                var F = services.BuildServiceProvider().GetService<IStringLocalizerFactory>();
+                var L = F.Create("ModelBindingMessages", "MojtabaBookStore");
+                options.ModelBindingMessageProvider.SetValueMustNotBeNullAccessor(
+                 (x) => L["انتخاب یکی از موارد لیست الزامی است."]);
+
+            });
             services.AddPaging(options => {
                 options.ViewName = "Bootstrap4";
                 options.HtmlIndicatorDown = "<i class='fa fa-sort-amount-down'></i>";
