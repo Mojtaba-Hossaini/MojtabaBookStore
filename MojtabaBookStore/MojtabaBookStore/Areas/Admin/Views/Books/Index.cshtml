@@ -52,7 +52,7 @@
                 </p>
                 <div class="collapse" id="collapseExample">
                     <div class="card card-body">
-                        <form>
+                        <form asp-action="AdvancedSearch">
                             <div class="row">
                                 <div class="col-md-3">
                                     <div class="form-group">
@@ -70,7 +70,7 @@
                                     <div class="form-group">
                                         <label class="form-control-label">زبان</label>
                                         <select class="select2 js-states form-control" name="Language" asp-items="ViewBag.LanguageID">
-                                            <option>همه زبان ها</option>
+                                            <option value="">همه زبان ها</option>
                                         </select>
                                     </div>
                                 </div>
@@ -84,7 +84,7 @@
                                     <div class="form-group">
                                         <label class="form-control-label">نویسنده</label>
                                         <select class="select2 js-states form-control" name="Author" asp-items="ViewBag.AuthorID">
-                                            <option>همه نویسنده ها</option>
+                                            <option value="">همه نویسنده ها</option>
                                         </select>
                                     </div>
                                 </div>
@@ -92,7 +92,7 @@
                                     <div class="form-group">
                                         <label class="form-control-label">مترجم</label>
                                         <select class="select2 js-states form-control" name="Translator" asp-items="ViewBag.TranslatorID">
-                                            <option>همه مترجم ها</option>
+                                            <option value="">همه مترجم ها</option>
                                             <
                                         </select>
                                     </div>
@@ -101,7 +101,7 @@
                                     <div class="form-group">
                                         <label class="form-control-label">ناشر</label>
                                         <select class="select2 js-states form-control" name="Publisher" asp-items="ViewBag.PublisherID">
-                                            <option>همه ناشر ها</option>    
+                                            <option value="">همه ناشر ها</option>    
                                         </select>
                                     </div>
                                 </div>
