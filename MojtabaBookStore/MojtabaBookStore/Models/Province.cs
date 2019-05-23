@@ -8,6 +8,8 @@ namespace MojtabaBookStore.Models
     {
         [Key]
         public int ProvinceID { get; set; }
+
+        [Display(Name = "نام استان")]
         public string ProvinceName { get; set; }
 
         public List<City> Cities { get; set; }

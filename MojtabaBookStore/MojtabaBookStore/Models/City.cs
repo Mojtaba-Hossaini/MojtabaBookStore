@@ -10,6 +10,8 @@ namespace MojtabaBookStore.Models
         public int CityID { get; set; }
         public string CityName { get; set; }
 
+        [ForeignKey("Provice")]
+        public int? ProvinceID { get; set; }
         public Province Provice { get; set; }
 
         public List<Customer> Customers1 { get; set; }

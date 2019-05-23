@@ -77,20 +77,25 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
             ViewBag.AuthorID = new SelectList(context.Authors.Select(c => new AuthorList { AuthorID = c.AuthorID, NameFamily = c.FirstName + " " + c.LastName }), "AuthorID", "NameFamily");
             ViewBag.TranslatorID = new SelectList(context.Translators.Select(c => new TranslatorList { TranslatorID = c.TranslatorID, NameFamily = c.Name + " " + c.Family }), "TranslatorID", "NameFamily");
 
-            BooksCreateViewModel viewModel = new BooksCreateViewModel(categoris);
+            BooksSubCategoriesViewModel subCategoriesVM = new BooksSubCategoriesViewModel(repo.GetAllCategories(), null);
+            BooksCreateEditViewModel viewModel = new BooksCreateEditViewModel(subCategoriesVM);
 
             return View(viewModel);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(BooksCreateViewModel ViewModel)
+        public async Task<IActionResult> Create(BooksCreateEditViewModel ViewModel)
         {
             if (ModelState.IsValid)
             {
-                List<Author_Book> authors = new List<Author_Book>();
                 List<Book_Translator> translators = new List<Book_Translator>();
                 List<Book_Category> categories = new List<Book_Category>();
+                if (ViewModel.TranslatorID != null)
+                    translators = ViewModel.TranslatorID.Select(a => new Book_Translator { TranslatorID = a }).ToList();
+                if (ViewModel.CategoryID != null)
+                    categories = ViewModel.CategoryID.Select(a => new Book_Category { CategoryID = a }).ToList();
+
                 DateTime? PublishDate = null;
                 var trnasAction = await context.Database.BeginTransactionAsync();
 
@@ -115,58 +120,13 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
                         PublishDate = PublishDate,
                         Weight = ViewModel.Weight,
                         PublisherID = ViewModel.PublisherID,
+                        Author_Books = ViewModel.AuthorID.Select(a => new Author_Book { AuthorID = a}).ToList(),
+                        Book_Translators = translators,
+                        Book_Categories = categories
+                        
                     };
 
                     await context.Books.AddAsync(book);
-
-                    if (ViewModel.AuthorID != null)
-                    {
-                        for (int i = 0; i < ViewModel.AuthorID.Length; i++)
-                        {
-                            Author_Book author = new Author_Book()
-                            {
-                                BookID = book.BookID,
-                                AuthorID = ViewModel.AuthorID[i],
-                            };
-
-                            authors.Add(author);
-                        }
-
-                        await context.Author_Books.AddRangeAsync(authors);
-                    }
-
-
-                    if (ViewModel.TranslatorID != null)
-                    {
-                        for (int i = 0; i < ViewModel.TranslatorID.Length; i++)
-                        {
-                            Book_Translator translator = new Book_Translator()
-                            {
-                                BookID = book.BookID,
-                                TranslatorID = ViewModel.TranslatorID[i],
-                            };
-
-                            translators.Add(translator);
-                        }
-
-                        await context.Book_Translators.AddRangeAsync(translators);
-                    }
-
-                    if (ViewModel.CategoryID != null)
-                    {
-                        for (int i = 0; i < ViewModel.CategoryID.Length; i++)
-                        {
-                            Book_Category category = new Book_Category()
-                            {
-                                BookID = book.BookID,
-                                CategoryID = ViewModel.CategoryID[i],
-                            };
-
-                            categories.Add(category);
-                        }
-
-                        await context.Book_Categories.AddRangeAsync(categories);
-                    }
 
                     await context.SaveChangesAsync();
                     trnasAction.Commit();
@@ -225,6 +185,147 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
             await context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null)
+                return NotFound();
+
+            var book = await context.Books.FindAsync(id);
+            if (book == null)
+                return NotFound();
+
+            var viewModel = context.Books.Include(l => l.Language).Include(p => p.Publisher).Where(c => c.BookID == id).Select(b => new BooksCreateEditViewModel
+            {
+                BookID = b.BookID,
+                Title = b.Title,
+                ISBN = b.ISBN,
+                NumOfPages = b.NumOfPages,
+                Price = b.Price,
+                Stock = b.Stock,
+                IsPublish = (bool)b.IsPublished,
+                LanguageID = b.LanguageID,
+                PublisherID = b.Publisher.PublisherID,
+                PublishYear = b.PublishYear,
+                Summary = b.Summary,
+                Weight = b.Weight,
+                RecentIsPublish = (bool)b.IsPublished,
+                PublishDate = b.PublishDate,
+            }).FirstAsync();
+
+            int[] AuthorsArray = await context.Author_Books.Where(c => c.BookID == id).Select(a => a.AuthorID).ToArrayAsync();
+            int[] TranslatorsArray = await context.Book_Translators.Where(c => c.BookID == id).Select(a => a.TranslatorID).ToArrayAsync();
+            int[] CategoriesArray = await context.Book_Categories.Where(c => c.BookID == id).Select(a => a.CategoryID).ToArrayAsync();
+
+            viewModel.Result.AuthorID = AuthorsArray;
+            viewModel.Result.TranslatorID = TranslatorsArray;
+            viewModel.Result.CategoryID = CategoriesArray;
+
+            ViewBag.LanguageID = new SelectList(context.Languages, "LanguageID", "LanguageName");
+            ViewBag.PublisherID = new SelectList(context.Publishers, "PublisherID", "PublisherName");
+            ViewBag.AuthorID = new SelectList(context.Authors.Select(t => new AuthorList { AuthorID = t.AuthorID, NameFamily = t.FirstName + " " + t.LastName }), "AuthorID", "NameFamily");
+            ViewBag.TranslatorID = new SelectList(context.Translators.Select(t => new TranslatorList { TranslatorID = t.TranslatorID, NameFamily = t.Name + " " + t.Family }), "TranslatorID", "NameFamily");
+            viewModel.Result.SubCategoriesVM = new BooksSubCategoriesViewModel(repo.GetAllCategories(), CategoriesArray);
+            return View(await viewModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(BooksCreateEditViewModel viewModel)
+        {
+            ViewBag.LanguageID = new SelectList(context.Languages, "LanguageID", "LanguageName");
+            ViewBag.PublisherID = new SelectList(context.Publishers, "PublisherID", "PublisherName");
+            ViewBag.AuthorID = new SelectList(context.Authors.Select(t => new AuthorList { AuthorID = t.AuthorID, NameFamily = t.FirstName + " " + t.LastName }), "AuthorID", "NameFamily");
+            ViewBag.TranslatorID = new SelectList(context.Translators.Select(t => new TranslatorList { TranslatorID = t.TranslatorID, NameFamily = t.Name + " " + t.Family }), "TranslatorID", "NameFamily");
+            viewModel.SubCategoriesVM = new BooksSubCategoriesViewModel(repo.GetAllCategories(), viewModel.CategoryID);
+
+            if (!ModelState.IsValid)
+            {
+                ViewBag.MsgFailed = "اطلاعات فرم نامعتبر است  بعد از اصلاح اطلاعات دوباره تلاش کنید";
+                return View(viewModel);
+            }
+                
+
+            try
+            {
+                DateTime? publishDate;
+                if (viewModel.IsPublish == true && viewModel.RecentIsPublish == false)
+                {
+                    publishDate = DateTime.Now;
+                }
+                else if (viewModel.RecentIsPublish == true && viewModel.IsPublish == false)
+                {
+                    publishDate = null;
+                }
+
+                else
+                {
+                    publishDate = viewModel.PublishDate;
+                }
+
+
+                Book book = new Book
+                {
+                    BookID = viewModel.BookID,
+                    Title = viewModel.Title,
+                    ISBN = viewModel.ISBN,
+                    NumOfPages = viewModel.NumOfPages,
+                    Price = viewModel.Price,
+                    Stock = viewModel.Stock,
+                    IsPublished = viewModel.IsPublish,
+                    LanguageID = viewModel.LanguageID,
+                    PublisherID = viewModel.PublisherID,
+                    PublishYear = viewModel.PublishYear,
+                    Summary = viewModel.Summary,
+                    Weight = viewModel.Weight,
+                    PublishDate = publishDate,
+                    IsDeleted = false,
+                };
+
+                context.Books.Update(book);
+
+                var RecentAuthors = await context.Author_Books.Where(c => c.BookID == viewModel.BookID).Select(c => c.AuthorID).ToArrayAsync();
+                var RecentTranslators = await context.Book_Translators.Where(c => c.BookID == viewModel.BookID).Select(c => c.TranslatorID).ToArrayAsync();
+                var RecentCategories = await context.Book_Categories.Where(c => c.BookID == viewModel.BookID).Select(c => c.CategoryID).ToArrayAsync();
+
+                var DeletedAuthors = RecentAuthors.Except(viewModel.AuthorID);
+                var DeletedTranslators = RecentTranslators.Except(viewModel.TranslatorID);
+                var DeletedCategories = RecentCategories.Except(viewModel.CategoryID);
+
+                var AddedAuthors = viewModel.AuthorID.Except(RecentAuthors);
+                var AddedTranslators = viewModel.TranslatorID.Except(RecentTranslators);
+                var AddedCategories = viewModel.CategoryID.Except(RecentCategories);
+
+                if (DeletedAuthors.Count() != 0)
+                    context.RemoveRange(DeletedAuthors.Select(a => new Author_Book { AuthorID = a, BookID = viewModel.BookID }).ToList());
+
+                if (DeletedTranslators.Count() != 0)
+                    context.RemoveRange(DeletedTranslators.Select(a => new Book_Translator { TranslatorID = a, BookID = viewModel.BookID }).ToList());
+
+                if (DeletedCategories.Count() != 0)
+                    context.RemoveRange(DeletedCategories.Select(a => new Book_Category { CategoryID = a, BookID = viewModel.BookID }).ToList());
+
+                if (AddedAuthors.Count() != 0)
+                    context.AddRange(AddedAuthors.Select(a => new Author_Book { AuthorID = a, BookID = viewModel.BookID }).ToList());
+
+                if (AddedTranslators.Count() != 0)
+                    context.AddRange(AddedTranslators.Select(a => new Book_Translator { TranslatorID = a, BookID = viewModel.BookID }).ToList());
+
+                if (AddedCategories.Count() != 0)
+                    context.AddRange(AddedCategories.Select(a => new Book_Category { CategoryID = a, BookID = viewModel.BookID }).ToList());
+
+
+                await context.SaveChangesAsync();
+                ViewBag.MsgSuccess = "ویرایش اطلاعات با موقیت انجام شد";
+                return View(viewModel);
+            }
+            catch (Exception)
+            {
+                ViewBag.MsgFailed = "به هنگام ویرایش اطلاعات مشکلی به وجود آمد لطفا دوباره تلاش کنید";
+                return View(viewModel);
+            }
         }
 
     }

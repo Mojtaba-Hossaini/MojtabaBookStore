@@ -1,22 +1,27 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace MojtabaBookStore.Models.ViewModels
 {
-    public class BooksCreateViewModel
+    public class BooksCreateEditViewModel
     {
-        public BooksCreateViewModel()
+        public BooksCreateEditViewModel()
         {
 
         }
-        public BooksCreateViewModel(IEnumerable<TreeViewCategory> viewCategories)
+        public BooksCreateEditViewModel(BooksSubCategoriesViewModel subCategoriesVM)
         {
-            Categories = viewCategories;
+            SubCategoriesVM = subCategoriesVM;
         }
+
+        public BooksSubCategoriesViewModel SubCategoriesVM { get; set; }
+        public int BookID { get; set; }
         public IEnumerable<TreeViewCategory> Categories { get; set; }
         [Required(ErrorMessage = "وارد نمودن {0} الزامی است.")]
         [Display(Name = "عنوان ")]
         public string Title { get; set; }
+
 
         [Display(Name = "خلاصه")]
         public string Summary { get; set; }
@@ -41,6 +46,10 @@ namespace MojtabaBookStore.Models.ViewModels
 
         [Display(Name = " این کتاب روی سایت منتشر شود.")]
         public bool IsPublish { get; set; }
+
+        public DateTime? PublishDate { get; set; }
+
+        public bool RecentIsPublish { get; set; }
 
 
         [Display(Name = "سال انتشار")]

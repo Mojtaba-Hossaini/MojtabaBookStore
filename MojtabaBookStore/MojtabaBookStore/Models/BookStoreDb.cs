@@ -28,7 +28,7 @@ namespace MojtabaBookStore.Models
         public DbSet<Order> Orders { get; set; }
         public DbSet<Author> Authors { get; set; }
         public DbSet<City> Cities { get; set; }
-        public DbSet<Province> Provices { get; set; }
+        public DbSet<Province> Provinces { get; set; }
         public DbSet<Author_Book> Author_Books { get; set; }
         public DbSet<Order_Book> Order_Books { get; set; }
         public DbSet<Language> Languages { get; set; }

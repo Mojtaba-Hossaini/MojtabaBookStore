@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore.Infrastructure;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -8,6 +9,18 @@ namespace MojtabaBookStore.Models
     
     public class Book
     {
+        private ILazyLoader LazayLoader { get; set; }
+        private Language _Language;
+        private Publisher _Publisher;
+        public Book()
+        {
+
+        }
+
+        private Book(ILazyLoader lazayLoader)
+        {
+            LazayLoader = lazayLoader;
+        }
         
         public int BookID { get; set; }
 
@@ -31,8 +44,16 @@ namespace MojtabaBookStore.Models
 
         
 
-        public Language Language { get; set; }
-        public Publisher Publisher { get; set; }
+        public Language Language
+        {
+            get => LazayLoader.Load(this, ref _Language);
+            set => _Language = value;
+        }
+        public Publisher Publisher
+        {
+            get => LazayLoader.Load(this, ref _Publisher);
+            set => _Publisher = value;
+        }
         public Discount Discount { get; set; }
         public List<Author_Book> Author_Books { get; set; }
         public List<Order_Book> Order_Books { get; set; }
