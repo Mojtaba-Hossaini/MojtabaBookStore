@@ -24,8 +24,11 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
             this.context = context;
             this.repo = repo;
         }
-        public IActionResult Index(int page = 1,int row = 5, string sortExpression = "Title", string title = "")
+        public IActionResult Index(string msg, int page = 1,int row = 5, string sortExpression = "Title", string title = "")
         {
+            if (msg != null)
+                ViewBag.Msg = "در ثبت اطلاعات به مشکل برخوردیم لطفا بعدا مجددا تلاش کنید";
+
             title = string.IsNullOrEmpty(title) ? "" : title;
             List<int> rows = new List<int> { 5,10,15,20,50,100};
             ViewBag.RowID = new SelectList(rows,row);
@@ -89,80 +92,92 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
                 List<Book_Translator> translators = new List<Book_Translator>();
                 List<Book_Category> categories = new List<Book_Category>();
                 DateTime? PublishDate = null;
-                if (ViewModel.IsPublish == true)
-                {
-                    PublishDate = DateTime.Now;
-                }
-                Book book = new Book()
-                {
-                    IsDeleted = false,
-                    ISBN = ViewModel.ISBN,
-                    IsPublished = ViewModel.IsPublish,
-                    NumOfPages = ViewModel.NumOfPages,
-                    Stock = ViewModel.Stock,
-                    Price = ViewModel.Price,
-                    LanguageID = ViewModel.LanguageID,
-                    Summary = ViewModel.Summary,
-                    Title = ViewModel.Title,
-                    PublishYear = ViewModel.PublishYear,
-                    PublishDate = PublishDate,
-                    Weight = ViewModel.Weight,
-                    PublisherID = ViewModel.PublisherID,
-                };
+                var trnasAction = await context.Database.BeginTransactionAsync();
 
-                await context.Books.AddAsync(book);
-
-                if (ViewModel.AuthorID != null)
+                try
                 {
-                    for (int i = 0; i < ViewModel.AuthorID.Length; i++)
+                    if (ViewModel.IsPublish == true)
                     {
-                        Author_Book author = new Author_Book()
-                        {
-                            BookID = book.BookID,
-                            AuthorID = ViewModel.AuthorID[i],
-                        };
+                        PublishDate = DateTime.Now;
+                    }
+                    Book book = new Book()
+                    {
+                        IsDeleted = false,
+                        ISBN = ViewModel.ISBN,
+                        IsPublished = ViewModel.IsPublish,
+                        NumOfPages = ViewModel.NumOfPages,
+                        Stock = ViewModel.Stock,
+                        Price = ViewModel.Price,
+                        LanguageID = ViewModel.LanguageID,
+                        Summary = ViewModel.Summary,
+                        Title = ViewModel.Title,
+                        PublishYear = ViewModel.PublishYear,
+                        PublishDate = PublishDate,
+                        Weight = ViewModel.Weight,
+                        PublisherID = ViewModel.PublisherID,
+                    };
 
-                        authors.Add(author);
+                    await context.Books.AddAsync(book);
+
+                    if (ViewModel.AuthorID != null)
+                    {
+                        for (int i = 0; i < ViewModel.AuthorID.Length; i++)
+                        {
+                            Author_Book author = new Author_Book()
+                            {
+                                BookID = book.BookID,
+                                AuthorID = ViewModel.AuthorID[i],
+                            };
+
+                            authors.Add(author);
+                        }
+
+                        await context.Author_Books.AddRangeAsync(authors);
                     }
 
-                    await context.Author_Books.AddRangeAsync(authors);
-                }
 
-
-                if (ViewModel.TranslatorID != null)
-                {
-                    for (int i = 0; i < ViewModel.TranslatorID.Length; i++)
+                    if (ViewModel.TranslatorID != null)
                     {
-                        Book_Translator translator = new Book_Translator()
+                        for (int i = 0; i < ViewModel.TranslatorID.Length; i++)
                         {
-                            BookID = book.BookID,
-                            TranslatorID = ViewModel.TranslatorID[i],
-                        };
+                            Book_Translator translator = new Book_Translator()
+                            {
+                                BookID = book.BookID,
+                                TranslatorID = ViewModel.TranslatorID[i],
+                            };
 
-                        translators.Add(translator);
+                            translators.Add(translator);
+                        }
+
+                        await context.Book_Translators.AddRangeAsync(translators);
                     }
 
-                    await context.Book_Translators.AddRangeAsync(translators);
-                }
-
-                if (ViewModel.CategoryID != null)
-                {
-                    for (int i = 0; i < ViewModel.CategoryID.Length; i++)
+                    if (ViewModel.CategoryID != null)
                     {
-                        Book_Category category = new Book_Category()
+                        for (int i = 0; i < ViewModel.CategoryID.Length; i++)
                         {
-                            BookID = book.BookID,
-                            CategoryID = ViewModel.CategoryID[i],
-                        };
+                            Book_Category category = new Book_Category()
+                            {
+                                BookID = book.BookID,
+                                CategoryID = ViewModel.CategoryID[i],
+                            };
 
-                        categories.Add(category);
+                            categories.Add(category);
+                        }
+
+                        await context.Book_Categories.AddRangeAsync(categories);
                     }
 
-                    await context.Book_Categories.AddRangeAsync(categories);
+                    await context.SaveChangesAsync();
+                    trnasAction.Commit();
+                    return RedirectToAction("Index");
                 }
+                catch (Exception)
+                {
 
-                await context.SaveChangesAsync();
-                return RedirectToAction("Index");
+                    return RedirectToAction("Index", new { msg = "failed" });
+                }
+                
             }
             else
             {
@@ -198,6 +213,18 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
             }).ToList();
             return View(bookInfo);
             
+        }
+
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+                return NotFound();
+
+            var book = await context.Books.FindAsync(id);
+            book.IsDeleted = true;
+            await context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
         }
 
     }
