@@ -186,6 +186,16 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
                 FirstName = c.Author.FirstName,
                 LastName = c.Author.LastName
             }).ToList();
+
+            ViewBag.Translators = context.Book_Translators.Include(c => c.Translator).Where(c => c.BookID == id).Select(c => new Translator {
+                Name = c.Translator.Name,
+                Family = c.Translator.Family
+            }).ToList();
+
+            ViewBag.Categories = context.Book_Categories.Include(c => c.Category).Where(c => c.BookID == id).Select(c => new Category
+            {
+                CategoryName = c.Category.CategoryName
+            }).ToList();
             return View(bookInfo);
             
         }
