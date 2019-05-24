@@ -8,6 +8,9 @@ namespace MojtabaBookStore.Models
     {
         [Key]
         public int CityID { get; set; }
+
+        [Display(Name = "شهر")]
+        [Required(ErrorMessage = "وارد نمودن {0} الزامی است.")]
         public string CityName { get; set; }
 
         [ForeignKey("Provice")]

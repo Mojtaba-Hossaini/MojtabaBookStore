@@ -2,29 +2,144 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using MojtabaBookStore.Models;
+using MojtabaBookStore.Models.UnitOfWork;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.EntityFrameworkCore;
+using ReflectionIT.Mvc.Paging;
 
-namespace MojtabaBookStore.Areas.Admin.Controllers
+namespace BookShop.Areas.Admin.Controllers
 {
     [Area("Admin")]
     public class CitiesController : Controller
     {
-        private readonly BookStoreDb context;
+        private readonly IUnitOfWork _UW;
 
-        public CitiesController(BookStoreDb context)
+        public CitiesController(IUnitOfWork UW)
         {
-            this.context = context;
+            _UW = UW;
         }
-        public async Task<IActionResult> Index(int id)
-        {
-            if (id == 0)
-                return NotFound();
 
-            var province = context.Provinces.SingleAsync(c => c.ProvinceID == id);
-            context.Entry(await province).Collection(c => c.Cities).Load();
-            return View(province.Result);
+        public async Task<IActionResult> Index(int id, int page = 1, int row = 10) // id==> ProvinceID
+        {
+            // Explicit Loading
+            var Province = _UW.Context.Provinces.SingleAsync(p => p.ProvinceID == id);
+            _UW.Context.Entry(await Province).Collection(c => c.Cities).Load();
+            return View(Province.Result);
+        }
+
+
+        public IActionResult Create(int id)
+        {
+            City city = new City() { ProvinceID = id };
+            return View(city);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create([Bind("CityID,CityName,ProvinceID")] City city)
+        {
+            if (ModelState.IsValid)
+            {
+                Random rdm = new Random();
+                int RandomID = rdm.Next(400, 1000);
+                var ExitID = await _UW.BaseRepository<City>().FindByID(RandomID);
+                while (ExitID != null)
+                {
+                    RandomID = rdm.Next(400, 1000);
+                    ExitID = await _UW.BaseRepository<City>().FindByID(RandomID);
+                }
+
+                City City = new City() { CityID = RandomID, CityName = city.CityName, ProvinceID = city.ProvinceID };
+                await _UW.BaseRepository<City>().Create(City);
+                await _UW.Commit();
+                return RedirectToAction(nameof(Index), new { id = city.ProvinceID });
+            }
+            return View(city);
+        }
+
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var author = await _UW.BaseRepository<City>().FindByID(id);
+            if (author == null)
+            {
+                return NotFound();
+            }
+            return View(author);
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, [Bind("CityID,CityName,ProvinceID")] City city)
+        {
+            if (id != city.CityID)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _UW.BaseRepository<City>().Update(city);
+                    await _UW.Commit();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (await _UW.BaseRepository<Province>().FindByID(city.CityID) == null)
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction(nameof(Index), new { id = city.ProvinceID });
+            }
+            return View(city);
+        }
+
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var city = await _UW.BaseRepository<City>().FindByID(id);
+            if (city == null)
+            {
+                return NotFound();
+            }
+
+            return View(city);
+        }
+
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var City = await _UW.BaseRepository<City>().FindByID(id);
+            if (City == null)
+            {
+                return NotFound();
+            }
+
+            else
+            {
+                _UW.BaseRepository<City>().Delete(City);
+                await _UW.Commit();
+                return RedirectToAction(nameof(Index), new { id = City.ProvinceID });
+            }
         }
     }
 }

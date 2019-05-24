@@ -1,9 +1,9 @@
-﻿@model Language
+﻿@model Province
 
 
 @{
     ViewData["Title"] = "Edit";
-    Layout = "~/Views/Shared/_Admin.cshtml";
+    
 }
 
 
@@ -11,20 +11,20 @@
     <div class="col-md-12">
         <div class="card">
             <div class="card-header bg-light">
-                افزودن زبان جدید
+                ویرایش اطلاعات
             </div>
             <form asp-action="Edit">
                 <div class="row card-body mb-3">
                     <div class="col-md-4">
                         <div class="row">
                             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                            <input type="hidden" asp-for="LanguageID" />
+                            <input type="hidden" asp-for="ProvinceID" />
                             <div class="col-md-2">
-                                <label asp-for="LanguageName" class="control-label"></label>
+                                <label asp-for="ProvinceName" class="control-label"></label>
                             </div>
                             <div class="col-md-10">
-                                <input asp-for="LanguageName" class="form-control" />
-                                <span asp-validation-for="LanguageName" class="text-danger"></span>
+                                <input asp-for="ProvinceName" class="form-control" />
+                                <span asp-validation-for="ProvinceName" class="text-danger"></span>
                             </div>
                         </div>
                     </div>

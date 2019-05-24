@@ -9,7 +9,8 @@ namespace MojtabaBookStore.Models
         [Key]
         public int ProvinceID { get; set; }
 
-        [Display(Name = "نام استان")]
+        [Display(Name = "استان")]
+        [Required(ErrorMessage = "وارد نمودن {0} الزامی است.")]
         public string ProvinceName { get; set; }
 
         public List<City> Cities { get; set; }

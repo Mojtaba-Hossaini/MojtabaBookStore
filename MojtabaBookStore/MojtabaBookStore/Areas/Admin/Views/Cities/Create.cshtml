@@ -1,9 +1,9 @@
-﻿@model Language
+﻿@model City
 
 
 @{
-    ViewData["Title"] = "Edit";
-    Layout = "~/Views/Shared/_Admin.cshtml";
+    ViewData["Title"] = "افزودن شهر";
+    
 }
 
 
@@ -11,25 +11,25 @@
     <div class="col-md-12">
         <div class="card">
             <div class="card-header bg-light">
-                افزودن زبان جدید
+                افزودن شهر جدید
             </div>
-            <form asp-action="Edit">
+            <form asp-action="Create">
                 <div class="row card-body mb-3">
                     <div class="col-md-4">
                         <div class="row">
                             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                            <input type="hidden" asp-for="LanguageID" />
+                            <input type="hidden" asp-for="ProvinceID" />
                             <div class="col-md-2">
-                                <label asp-for="LanguageName" class="control-label"></label>
+                                <label asp-for="CityName" class="control-label"></label>
                             </div>
                             <div class="col-md-10">
-                                <input asp-for="LanguageName" class="form-control" />
-                                <span asp-validation-for="LanguageName" class="text-danger"></span>
+                                <input asp-for="CityName" class="form-control" />
+                                <span asp-validation-for="CityName" class="text-danger"></span>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <button type="submit" class="btn btn-info float-right">ذخیره تغییرات</button>
+                        <button type="submit" class="btn btn-info float-right">افزودن شهر</button>
                     </div>
                 </div>
             </form>

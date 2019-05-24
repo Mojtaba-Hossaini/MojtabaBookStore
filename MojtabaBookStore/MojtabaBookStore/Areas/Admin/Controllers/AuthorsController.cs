@@ -6,23 +6,27 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MojtabaBookStore.Models;
+using MojtabaBookStore.Models.Repository;
+using MojtabaBookStore.Models.UnitOfWork;
 
 namespace MojtabaBookStore.Areas.Admin.Controllers
 {
     [Area("Admin")]
     public class AuthorsController : Controller
     {
-        private readonly BookStoreDb _context;
+        private readonly IUnitOfWork uw;
+        private readonly IBaseRepository<Author> repo;
 
-        public AuthorsController(BookStoreDb context)
+        public AuthorsController(IUnitOfWork uw)
         {
-            _context = context;
+            this.uw = uw;
+            repo = uw.BaseRepository<Author>();
         }
 
         // GET: Admin/Authors
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Authors.ToListAsync());
+            return View(await repo.FindAllAsync());
         }
 
         // GET: Admin/Authors/Details/5
@@ -33,8 +37,7 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            var author = await _context.Authors
-                .FirstOrDefaultAsync(m => m.AuthorID == id);
+            var author = await repo.FindByID(id);
             if (author == null)
             {
                 return NotFound();
@@ -58,8 +61,8 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(author);
-                await _context.SaveChangesAsync();
+                await repo.Create(author);
+                await uw.Commit();
                 return RedirectToAction(nameof(Index));
             }
             return View(author);
@@ -73,7 +76,7 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            var author = await _context.Authors.FindAsync(id);
+            var author = await repo.FindByID(id);
             if (author == null)
             {
                 return NotFound();
@@ -97,12 +100,12 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
             {
                 try
                 {
-                    _context.Update(author);
-                    await _context.SaveChangesAsync();
+                    repo.Update(author);
+                    await uw.Commit();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!AuthorExists(author.AuthorID))
+                    if (await repo.FindByID(author.AuthorID) == null)
                     {
                         return NotFound();
                     }
@@ -124,14 +127,13 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            var author = await _context.Authors
-                .FirstOrDefaultAsync(m => m.AuthorID == id);
+            var author = repo.FindByID(id);
             if (author == null)
             {
                 return NotFound();
             }
 
-            return View(author);
+            return View(await author);
         }
 
         // POST: Admin/Authors/Delete/5
@@ -139,21 +141,17 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var author = await _context.Authors.FindAsync(id);
-            _context.Authors.Remove(author);
-            await _context.SaveChangesAsync();
+            var author = await repo.FindByID(id);
+            repo.Delete(author);
+            await uw.Commit();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool AuthorExists(int id)
-        {
-            return _context.Authors.Any(e => e.AuthorID == id);
-        }
-
+        
         public async Task<IActionResult> AuthorBooks(int id)
         {
-            
-            var author = _context.Authors.Where(c => c.AuthorID == id).FirstOrDefaultAsync();
+
+            var author = repo.FindByID(id);
             if (author == null)
                 return NotFound();
 

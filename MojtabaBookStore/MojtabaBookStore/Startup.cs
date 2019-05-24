@@ -15,6 +15,7 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Localization;
 using MojtabaBookStore.Models;
 using MojtabaBookStore.Models.Repository;
+using MojtabaBookStore.Models.UnitOfWork;
 using MojtabaBookStore.Services;
 using ReflectionIT.Mvc.Paging;
 
@@ -39,6 +40,7 @@ namespace MojtabaBookStore
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
+            services.AddTransient<IUnitOfWork, UnitOfWork>();
             services.AddTransient<ConvertDate>();
             services.AddTransient<BooksRepository>();
             services.AddDbContext<BookStoreDb>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));

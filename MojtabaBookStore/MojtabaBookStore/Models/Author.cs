@@ -20,7 +20,13 @@ namespace MojtabaBookStore.Models
 
         [Key]
         public int AuthorID { get; set; }
+
+        [Display(Name = "نام")]
+        [Required(ErrorMessage = "وارد نمودن {0} الزامی است.")]
         public string FirstName { get; set; }
+
+        [Display(Name = "نام خانوادگی")]
+        [Required(ErrorMessage = "وارد نمودن {0} الزامی است.")]
         public string LastName { get; set; }
 
         public List<Author_Book> Author_Books

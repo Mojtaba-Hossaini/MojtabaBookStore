@@ -3,23 +3,35 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using MojtabaBookStore.Models;
+using MojtabaBookStore.Models.Repository;
+using MojtabaBookStore.Models.UnitOfWork;
+using ReflectionIT.Mvc.Paging;
 
 namespace MojtabaBookStore.Areas.Admin.Controllers
 {
     [Area("Admin")]
     public class TranslatorsController : Controller
     {
-        private readonly BookStoreDb context;
+        private readonly IUnitOfWork uw;
+        private readonly IBaseRepository<Translator> repo;
 
-        public TranslatorsController(BookStoreDb context)
+        public TranslatorsController(IUnitOfWork uw)
         {
-            this.context = context;
+            this.uw = uw;
+            repo = uw.BaseRepository<Translator>();
         }
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int page = 1, int row = 10)
         {
-            return View(await context.Translators.ToListAsync());
+            var translators = repo.FindAllAsync();
+            var pagingModel = PagingList.Create(await translators, row, page);
+            pagingModel.RouteValue = new RouteValueDictionary
+            {
+                {"row",row},
+            };
+            return View(pagingModel);
         }
 
         public IActionResult Create()
@@ -33,8 +45,8 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
-                context.Add(translator);
-                await context.SaveChangesAsync();
+                await repo.Create(translator);
+                await uw.Commit();
                 return RedirectToAction(nameof(Index));
             }
             return View(translator);
@@ -44,7 +56,7 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
         {
             if (id == null)
                 return NotFound();
-            var translator = await context.Translators.FindAsync(id);
+            var translator = await repo.FindByID(id);
             if (translator == null)
                 return NotFound();
             return View(translator);
@@ -57,8 +69,8 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
-                context.Update(translator);
-                await context.SaveChangesAsync();
+                repo.Update(translator);
+                await uw.Commit();
                 return RedirectToAction(nameof(Index));
             }
             return View(translator);
@@ -69,7 +81,7 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
             if (id == null)
                 return NotFound();
 
-            var translator = await context.Translators.FindAsync(id);
+            var translator = await repo.FindByID(id);
             if (translator == null)
                 return NotFound();
 
@@ -83,11 +95,11 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
             if (id == null)
                 return NotFound();
 
-            var translator = await context.Translators.FindAsync(id);
+            var translator = await repo.FindByID(id);
             if (translator != null)
             {
-                context.Translators.Remove(translator);
-                await context.SaveChangesAsync();
+                repo.Delete(translator);
+                await uw.Commit();
                 return RedirectToAction(nameof(Index));
             }
             return NotFound();

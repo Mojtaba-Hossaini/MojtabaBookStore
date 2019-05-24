@@ -1,33 +1,26 @@
-﻿@model MojtabaBookStore.Models.Author
+﻿@model Author
 
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = "حذف کردن";
+   
 }
 
-<h2>Delete</h2>
 
-<h3>Are you sure you want to delete this?</h3>
-<div>
-    <h4>Author</h4>
-    <hr />
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.FirstName)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.FirstName)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.LastName)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.LastName)
-        </dd>
-    </dl>
-    
-    <form asp-action="Delete">
-        <input type="hidden" asp-for="AuthorID" />
-        <input type="submit" value="Delete" class="btn btn-default" /> |
-        <a asp-action="Index">Back to List</a>
-    </form>
+<div class="row w-75 m-auto">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-light">حذف اطلاعات</div>
+            <div class="card-body">
+                <p>آیا شما می خواهید <span> @Model.FirstName  @Model.LastName را از لیست نویسندگان حذف کنید ؟ </span> </p>
+            </div>
+
+            <div class="card-footer bg-light text-right clearfix">
+                <form asp-action="Delete">
+                    <input type="hidden" value="@Model.AuthorID" name="id" />
+                    <input type="submit" value="بله" class="btn btn-danger mr-2 float-left" />
+                    <a asp-action="Index" class="btn btn-info float-left">خیر</a>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>

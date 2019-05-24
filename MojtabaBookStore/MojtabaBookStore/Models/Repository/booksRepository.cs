@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace MojtabaBookStore.Models.Repository
 {
-    public class BooksRepository
+    public class BooksRepository : IBookRepository
     {
         private readonly BookStoreDb context;
 

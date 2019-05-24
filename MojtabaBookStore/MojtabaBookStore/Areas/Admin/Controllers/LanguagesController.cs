@@ -4,44 +4,40 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using MojtabaBookStore.Models;
+using MojtabaBookStore.Models.Repository;
+using MojtabaBookStore.Models.UnitOfWork;
+using ReflectionIT.Mvc.Paging;
 
 namespace MojtabaBookStore.Areas.Admin.Controllers
 {
     [Area("Admin")]
     public class LanguagesController : Controller
     {
-        private readonly BookStoreDb _context;
+        private readonly IUnitOfWork uw;
+        private readonly IBaseRepository<Language> repo;
 
-        public LanguagesController(BookStoreDb context)
+        public LanguagesController(IUnitOfWork uw)
         {
-            _context = context;
+            this.uw = uw;
+            repo = uw.BaseRepository<Language>();
         }
 
         // GET: Admin/Languages
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int page = 1, int row = 10)
         {
-            return View(await _context.Languages.ToListAsync());
+            var languages = repo.FindAllAsync();
+            var pagingModel = PagingList.Create(await languages, row, page);
+            pagingModel.RouteValue = new RouteValueDictionary
+            {
+                {"row",row},
+            };
+            return View(pagingModel);
         }
 
-        // GET: Admin/Languages/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var language = await _context.Languages
-                .FirstOrDefaultAsync(m => m.LanguageID == id);
-            if (language == null)
-            {
-                return NotFound();
-            }
-
-            return View(language);
-        }
+        
 
         // GET: Admin/Languages/Create
         public IActionResult Create()
@@ -58,8 +54,8 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(language);
-                await _context.SaveChangesAsync();
+                await repo.Create(language);
+                await uw.Commit();
                 return RedirectToAction(nameof(Index));
             }
             return View(language);
@@ -73,7 +69,7 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            var language = await _context.Languages.FindAsync(id);
+            var language = await repo.FindByID(id);
             if (language == null)
             {
                 return NotFound();
@@ -97,12 +93,12 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
             {
                 try
                 {
-                    _context.Update(language);
-                    await _context.SaveChangesAsync();
+                    repo.Update(language);
+                    await uw.Commit();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!LanguageExists(language.LanguageID))
+                    if (repo.FindByID(language.LanguageID) == null)
                     {
                         return NotFound();
                     }
@@ -124,8 +120,7 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            var language = await _context.Languages
-                .FirstOrDefaultAsync(m => m.LanguageID == id);
+            var language = await repo.FindByID(id);
             if (language == null)
             {
                 return NotFound();
@@ -139,15 +134,12 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var language = await _context.Languages.FindAsync(id);
-            _context.Languages.Remove(language);
-            await _context.SaveChangesAsync();
+            var language = await repo.FindByID(id);
+            repo.Delete(language);
+            await uw.Commit();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool LanguageExists(int id)
-        {
-            return _context.Languages.Any(e => e.LanguageID == id);
-        }
+        
     }
 }
