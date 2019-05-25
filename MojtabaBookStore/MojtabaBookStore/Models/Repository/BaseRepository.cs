@@ -19,9 +19,9 @@ namespace MojtabaBookStore.Models.Repository
             dbSet = context.Set<TEntity>();
         }
 
-        public async Task<IEnumerable<TEntity>> FindAllAsync() => await dbSet.ToListAsync();
+        public async Task<IEnumerable<TEntity>> FindAllAsync() => await dbSet.AsNoTracking().ToListAsync();
 
-        public IEnumerable<TEntity> FindAll() => dbSet.ToList();
+        public IEnumerable<TEntity> FindAll() => dbSet.AsNoTracking().ToList();
 
 
         public async Task<TEntity> FindByID(int? id)
@@ -59,5 +59,13 @@ namespace MojtabaBookStore.Models.Repository
         public void UpdateRange(IEnumerable<TEntity> entities) => dbSet.UpdateRange(entities);
 
         public void DeleteRange(IEnumerable<TEntity> entities) => dbSet.RemoveRange(entities);
+
+        public async Task<List<TEntity>> GetPaginateResultAsync(int currentPage = 1, int pageSize = 5)
+        {
+            var entities = await FindAllAsync();
+            return entities.Skip((currentPage - 1) * pageSize).Take(pageSize).ToList();
+        }
+
+        public int GetCount() => dbSet.Count();
     }
 }

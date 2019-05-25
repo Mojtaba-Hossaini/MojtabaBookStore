@@ -19,5 +19,7 @@ namespace MojtabaBookStore.Models.Repository
         Task CreateRange(IEnumerable<TEntity> entities);
         void UpdateRange(IEnumerable<TEntity> entities);
         void DeleteRange(IEnumerable<TEntity> entities);
+        Task<List<TEntity>> GetPaginateResultAsync(int currentPage = 1, int pageSize = 5);
+        int GetCount();
     }
 }

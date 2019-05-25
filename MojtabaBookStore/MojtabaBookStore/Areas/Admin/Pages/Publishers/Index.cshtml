@@ -1,6 +1,9 @@
-﻿@page
+﻿@page "{CurrentPage:int?}"
 @model MojtabaBookStore.Areas.Admin.Pages.Publishers.IndexModel
+
 @{
+    ViewData["Title"] = "صفحه اصلی ناشران";
+    Layout = "~/Views/Shared/_Admin.cshtml";
 }
 
 <div class="row">
@@ -24,17 +27,17 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var item in Model.Publishers)
+                            @foreach (var item in Model.Publisher)
                             {
                                 <tr>
                                     <td>
-                                        
+                                        @item.PublisherName
                                     </td>
                                     <td class="text-center">
-                                        <a asp-page="./Edit" asp-route-id="" class="btn btn-success btn-icon">
+                                        <a asp-page="./Edit" asp-route-id="@item.PublisherID" class="btn btn-success btn-icon">
                                             <i class="fa fa-edit"></i>
                                         </a>
-                                        <button type="submit" asp-route-id="" asp-page-handler="Delete" class="btn btn-danger btn-icon">
+                                        <button type="submit" asp-route-id="@item.PublisherID" asp-page-handler="Delete" class="btn btn-danger btn-icon">
                                             <i class="fa fa-trash"></i>
                                         </button>
                                     </td>
@@ -42,6 +45,32 @@
                             }
                         </tbody>
                     </table>
+                    <ul class="pagination">
+                        @if (Model.ShowPrevious)
+                        {
+                            <li class="page-item">
+                                <a asp-page="./Index" asp-route-CurrentPage="@(Model.CurrentPage-1)" class="page-link">«</a>
+                            </li>
+                        }
+
+                        @for (int i = 1; i <= Model.TotalPages; i++)
+                        {
+                            <li class="page-item @(i==Model.CurrentPage?"active" : "")">
+                                <a asp-page="./Index" asp-route-CurrentPage="@i" class="page-link">
+                                    @i
+                                </a>
+                            </li>
+                        }
+
+                        @if (Model.ShowNext)
+                        {
+                            <li class="page-item">
+                                <a asp-page="./Index" asp-route-CurrentPage="@(Model.CurrentPage+1)">
+                                    »
+                                </a>
+                            </li>
+                        }
+                    </ul>
                 </form>
 
             </div>

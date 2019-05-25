@@ -1,8 +1,8 @@
 ﻿@page
-@model MojtabaBookStore.Areas.Admin.Pages.Publishers.CreateModel
+@model MojtabaBookStore.Areas.Admin.Pages.Publishers.EditModel
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "ویرایش ناشر";
     Layout = "~/Views/Shared/_Admin.cshtml";
 }
 
@@ -10,13 +10,14 @@
     <div class="col-md-12">
         <div class="card">
             <div class="card-header bg-light">
-                افزودن ناشر جدید
+                ویرایش اطلاعات ناشر
             </div>
             <form method="post">
                 <div class="row card-body mb-3">
                     <div class="col-md-4">
                         <div class="row">
                             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            <input type="hidden" asp-for="Publisher.PublisherID" />
                             <div class="col-md-2">
                                 <label asp-for="Publisher.PublisherName" class="control-label"></label>
                             </div>
@@ -27,7 +28,7 @@
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <button type="submit" class="btn btn-info float-right">افزودن ناشر</button>
+                        <button type="submit" class="btn btn-info float-right">ویرایش اطلاعات</button>
                     </div>
                 </div>
             </form>
