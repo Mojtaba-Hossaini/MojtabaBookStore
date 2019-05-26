@@ -13,8 +13,8 @@ namespace MojtabaBookStore.Config
     {
         public void Configure(EntityTypeBuilder<Customer> builder)
         {
-            builder.Property(p => p.FirstName).HasColumnName("FName").HasColumnType("nvarchar(20)");
-            builder.Ignore(p => p.Age).Property(p => p.LastName).HasColumnName("LName").HasMaxLength(100);
+            //builder.Property(p => p.FirstName).HasColumnName("FName").HasColumnType("nvarchar(20)");
+            //builder.Ignore(p => p.Age).Property(p => p.LastName).HasColumnName("LName").HasMaxLength(100);
             builder.HasOne(p => p.city1).WithMany(t => t.Customers1).HasForeignKey(p => p.CityID1);
 
             builder.HasOne(p => p.city2).WithMany(t => t.Customers2).HasForeignKey(p => p.CityID2).OnDelete(DeleteBehavior.Restrict);
