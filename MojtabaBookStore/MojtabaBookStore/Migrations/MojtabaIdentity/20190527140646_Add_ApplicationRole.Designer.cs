@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MojtabaBookStore.Models;
 
 namespace MojtabaBookStore.Migrations.MojtabaIdentity
 {
     [DbContext(typeof(MojtabaIdentityContext))]
-    partial class MojtabaIdentityContextModelSnapshot : ModelSnapshot
+    [Migration("20190527140646_Add_ApplicationRole")]
+    partial class Add_ApplicationRole
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -77,6 +79,19 @@ namespace MojtabaBookStore.Migrations.MojtabaIdentity
                     b.ToTable("AspNetUserLogins");
                 });
 
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
+                {
+                    b.Property<string>("UserId");
+
+                    b.Property<string>("RoleId");
+
+                    b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetUserRoles");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
                     b.Property<string>("UserId");
@@ -116,19 +131,6 @@ namespace MojtabaBookStore.Migrations.MojtabaIdentity
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AppRoles");
-                });
-
-            modelBuilder.Entity("MojtabaBookStore.Areas.Identity.Data.ApplicationUserRole", b =>
-                {
-                    b.Property<string>("UserId");
-
-                    b.Property<string>("RoleId");
-
-                    b.HasKey("UserId", "RoleId");
-
-                    b.HasIndex("RoleId");
-
-                    b.ToTable("AppUserRole");
                 });
 
             modelBuilder.Entity("MojtabaBookStore.Areas.Identity.Data.MojtabaBookStoreUser", b =>
@@ -212,21 +214,21 @@ namespace MojtabaBookStore.Migrations.MojtabaIdentity
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
                 {
+                    b.HasOne("MojtabaBookStore.Areas.Identity.Data.ApplicationRole")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.HasOne("MojtabaBookStore.Areas.Identity.Data.MojtabaBookStoreUser")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("MojtabaBookStore.Areas.Identity.Data.ApplicationUserRole", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("MojtabaBookStore.Areas.Identity.Data.ApplicationRole", "Role")
-                        .WithMany("Users")
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
                     b.HasOne("MojtabaBookStore.Areas.Identity.Data.MojtabaBookStoreUser")
                         .WithMany()
                         .HasForeignKey("UserId")

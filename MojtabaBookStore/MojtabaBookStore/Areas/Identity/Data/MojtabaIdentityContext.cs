@@ -9,7 +9,7 @@ using MojtabaBookStore.Areas.Identity.Data;
 
 namespace MojtabaBookStore.Models
 {
-    public class MojtabaIdentityContext : IdentityDbContext<MojtabaBookStoreUser>
+    public class MojtabaIdentityContext : IdentityDbContext<MojtabaBookStoreUser, ApplicationRole,string, IdentityUserClaim<string>,ApplicationUserRole,IdentityUserLogin<string>,IdentityRoleClaim<string>,IdentityUserToken<string>>
     {
         public MojtabaIdentityContext(DbContextOptions<MojtabaIdentityContext> options)
             : base(options)
@@ -19,9 +19,9 @@ namespace MojtabaBookStore.Models
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-            // Customize the ASP.NET Identity model and override the defaults if needed.
-            // For example, you can rename the ASP.NET Identity table names and more.
-            // Add your customizations after calling base.OnModelCreating(builder);
+            builder.Entity<ApplicationRole>().ToTable("AspNetRoles").ToTable("AppRoles");
+            builder.Entity<ApplicationUserRole>().ToTable("AppUserRole");
+            builder.Entity<ApplicationUserRole>().HasOne(ur => ur.Role).WithMany(r => r.Users).HasForeignKey(f => f.RoleId);
         }
     }
 }

@@ -2673,7 +2673,7 @@ a.btn.disabled, fieldset:disabled a.btn {
         }
 
 .btn-info {
-    color: #fff;
+    color: #fff !important;
     background-color: #26c6da;
     border-color: #26c6da;
 }
@@ -8997,6 +8997,12 @@ a.text-dark:focus, a.text-dark:hover {
     .sidebar .nav-dropdown.open .nav-dropdown-items {
         max-height: 1000px !important;
         background-color: #1f1f1f;
+        padding-right:35px;
+    }
+
+   .nav-dropdown-items .nav-link {
+      padding: 10px !important;
+      font-size: 13px !important;
     }
 
     .sidebar .nav-dropdown.open .nav-dropdown-toggle i:last-of-type {

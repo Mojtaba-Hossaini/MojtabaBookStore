@@ -13,6 +13,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Localization;
+using MojtabaBookStore.Areas.Identity.Data;
 using MojtabaBookStore.Models;
 using MojtabaBookStore.Models.Repository;
 using MojtabaBookStore.Models.UnitOfWork;
@@ -43,6 +44,7 @@ namespace MojtabaBookStore
             services.AddTransient<IUnitOfWork, UnitOfWork>();
             services.AddTransient<ConvertDate>();
             services.AddTransient<BooksRepository>();
+            services.AddScoped<IApplicationRoleManager, ApplicationRoleManager>();
             services.AddDbContext<BookStoreDb>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddLocalization(options => { options.ResourcesPath = "Resources"; });
             services.AddMvc(options =>

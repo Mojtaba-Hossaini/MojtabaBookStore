@@ -20,8 +20,13 @@ namespace MojtabaBookStore.Areas.Identity
                     options.UseSqlServer(
                         context.Configuration.GetConnectionString("MojtabaIdentityContextConnection")));
 
-                services.AddDefaultIdentity<MojtabaBookStoreUser>()
-                    .AddEntityFrameworkStores<MojtabaIdentityContext>();
+                //services.AddDefaultIdentity<MojtabaBookStoreUser>()
+                //    .AddEntityFrameworkStores<MojtabaIdentityContext>();
+
+                services.AddIdentity<MojtabaBookStoreUser, ApplicationRole>()
+                   .AddDefaultUI()
+                   .AddEntityFrameworkStores<MojtabaIdentityContext>()
+                   .AddDefaultTokenProviders();
             });
         }
     }
