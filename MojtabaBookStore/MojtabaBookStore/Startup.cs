@@ -45,6 +45,8 @@ namespace MojtabaBookStore
             services.AddTransient<ConvertDate>();
             services.AddTransient<BooksRepository>();
             services.AddScoped<IApplicationRoleManager, ApplicationRoleManager>();
+            services.AddScoped<IApplicationUserManager, ApplicationUserManager>();
+            services.AddScoped<ApplicationIdentityErrorDescriber>();
             services.AddDbContext<BookStoreDb>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddLocalization(options => { options.ResourcesPath = "Resources"; });
             services.AddMvc(options =>
