@@ -29,6 +29,9 @@ namespace MojtabaBookStore.Models.ViewModels.UsersManager
         [Display(Name = "تاریخ تولد")]
         public DateTime BirthDate { get; set; }
 
+        [Display(Name = "تاریخ تولد")]
+        public string PersianBirthDate { get; set; }
+
         [Display(Name = "تصویر پروفایل")]
         public string Image { get; set; }
 

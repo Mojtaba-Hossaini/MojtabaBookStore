@@ -19,7 +19,10 @@ namespace MojtabaBookStore.Areas.Identity.Data
         public override IdentityError InvalidUserName(string userName) => new IdentityError { Code = nameof(InvalidUserName), Description = "نام کاربری فقط میتواند شامل حروف انگلیسی و اعداد باشد" };
 
         public override IdentityError DuplicateEmail(string email) => new IdentityError { Code = nameof(DuplicateEmail), Description = $"شما قبلا با ایمیل  {email}  ثبت نام کرده اید" };
-        
+
+        public override IdentityError DuplicateRoleName(string role) => new IdentityError { Code = nameof(DuplicateRoleName), Description = $"نقش ' {role} ' تکراری میباشد" };
+
+
 
 
 

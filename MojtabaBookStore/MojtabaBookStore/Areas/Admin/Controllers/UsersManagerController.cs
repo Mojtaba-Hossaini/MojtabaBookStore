@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using MojtabaBookStore.Areas.Identity.Data;
+using MojtabaBookStore.Models.ViewModels.UsersManager;
+using MojtabaBookStore.Services;
 using ReflectionIT.Mvc.Paging;
 
 namespace MojtabaBookStore.Areas.Admin.Controllers
@@ -12,10 +15,14 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
     public class UsersManagerController : Controller
     {
         private readonly IApplicationUserManager userManager;
+        private readonly IApplicationRoleManager roleManager;
+        private readonly IConvertDate convertDate;
 
-        public UsersManagerController(IApplicationUserManager userManager)
+        public UsersManagerController(IApplicationUserManager userManager, IApplicationRoleManager roleManager, IConvertDate convertDate)
         {
             this.userManager = userManager;
+            this.roleManager = roleManager;
+            this.convertDate = convertDate;
         }
         public async Task<IActionResult> Index(string Msg, int page = 1, int row =10)
         {
@@ -25,5 +32,120 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
             var pagingModel = PagingList.Create(await userManager.GetAllUsersWithRolesAsync(), row, page);
             return View(pagingModel);
         }
+
+        public async Task<IActionResult> Details(string id)
+        {
+            if (id == null)
+                return NotFound();
+
+            var user = await userManager.FindUserWithRolesByIdAsync(id);
+            if (user == null)
+                return NotFound();
+
+            return View(user);
+        }
+
+        public async Task<IActionResult> Edit(string id)
+        {
+            if (id == null)
+                return NotFound();
+
+            var user = await userManager.FindUserWithRolesByIdAsync(id);
+            if (user == null)
+                return NotFound();
+
+            ViewBag.AllRoles = roleManager.GetAllRoles();
+            user.PersianBirthDate = convertDate.MiladiToShamsi(user.BirthDate, "yyyy/MM/dd");
+            return View(user);
+
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(UsersViewModel viewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                var User = await userManager.FindByIdAsync(viewModel.Id);
+                if (User == null)
+                    return NotFound();
+                else
+                {
+                    IdentityResult Result;
+                    var RecentRoles = await userManager.GetRolesAsync(User);
+                    var DeleteRoles = RecentRoles.Except(viewModel.Roles);
+                    var AddRoles = viewModel.Roles.Except(RecentRoles);
+
+                    Result = await userManager.RemoveFromRolesAsync(User, DeleteRoles);
+                    if (Result.Succeeded)
+                    {
+                        Result = await userManager.AddToRolesAsync(User, AddRoles);
+                        if (Result.Succeeded)
+                        {
+                            User.FirstName = viewModel.FirstName;
+                            User.LastName = viewModel.LastName;
+                            User.Email = viewModel.Email;
+                            User.PhoneNumber = viewModel.PhoneNumber;
+                            User.UserName = viewModel.UserName;
+                            User.BirthDate = convertDate.ShamsiToMiladi(viewModel.PersianBirthDate);
+
+                            Result = await userManager.UpdateAsync(User);
+                            if (Result.Succeeded)
+                            {
+                                ViewBag.AlertSuccess = "ذخیره تغییرات با موفقیت انجام شد.";
+                            }
+                        }
+                    }
+
+                    if (Result != null)
+                    {
+                        foreach (var item in Result.Errors)
+                        {
+                            ModelState.AddModelError("", item.Description);
+                        }
+                    }
+                }
+            }
+
+            ViewBag.AllRoles = roleManager.GetAllRoles();
+            return View(viewModel);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Delete(string id)
+        {
+            if (id == null)
+                return NotFound();
+            var User = await userManager.FindByIdAsync(id);
+            if (User == null)
+                return NotFound();
+            else
+                return View(User);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [ActionName("Delete")]
+        public async Task<IActionResult> Deleted(string id)
+        {
+            if (id == null)
+                return NotFound();
+            var User = await userManager.FindByIdAsync(id);
+            if (User == null)
+                return NotFound();
+            else
+            {
+                var Result = await userManager.DeleteAsync(User);
+                if (Result.Succeeded)
+                    return RedirectToAction("Index");
+                else
+                    ViewBag.AlertError = "در حذف اطلاعات خطایی رخ داده است.";
+
+                return View(User);
+            }
+        }
+
+
     }
 }

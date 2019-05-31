@@ -43,6 +43,7 @@ namespace MojtabaBookStore
 
             services.AddTransient<IUnitOfWork, UnitOfWork>();
             services.AddTransient<ConvertDate>();
+            services.AddTransient<IConvertDate, ConvertDate>();
             services.AddTransient<BooksRepository>();
             services.AddScoped<IApplicationRoleManager, ApplicationRoleManager>();
             services.AddScoped<IApplicationUserManager, ApplicationUserManager>();

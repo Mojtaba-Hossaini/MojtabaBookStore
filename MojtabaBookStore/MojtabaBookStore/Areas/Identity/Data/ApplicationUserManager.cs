@@ -69,5 +69,31 @@ namespace MojtabaBookStore.Areas.Identity.Data
 
             }).ToListAsync();
         }
+
+        public async Task<UsersViewModel> FindUserWithRolesByIdAsync(string UserID)
+        {
+            return await Users.Where(u => u.Id == UserID).Select(user => new UsersViewModel
+            {
+                Id = user.Id,
+                Email = user.Email,
+                UserName = user.UserName,
+                PhoneNumber = user.PhoneNumber,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                BirthDate = user.BirthDate,
+                IsActive = user.IsActive,
+                LastVisitDateTime = user.LastVisitDateTime,
+                Image = user.Image,
+                RegisterDate = user.RegisterDate,
+                Roles = user.Roles.Select(u => u.Role.Name),
+                AccessFailedCount = user.AccessFailedCount,
+                EmailConfirmed = user.EmailConfirmed,
+                LockoutEnabled = user.LockoutEnabled,
+                LockoutEnd = user.LockoutEnd,
+                PhoneNumberConfirmed = user.PhoneNumberConfirmed,
+                TwoFactorEnabled = user.TwoFactorEnabled,
+
+            }).FirstOrDefaultAsync();
+        }
     }
 }

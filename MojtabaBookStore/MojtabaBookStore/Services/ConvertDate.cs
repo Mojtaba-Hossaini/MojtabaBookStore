@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MojtabaBookStore.Services
 {
-    public class ConvertDate
+    public class ConvertDate : IConvertDate
     {
         public DateTime ShamsiToMiladi(string date)
         {

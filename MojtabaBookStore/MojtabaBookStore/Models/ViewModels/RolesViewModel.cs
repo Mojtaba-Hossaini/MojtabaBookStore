@@ -22,7 +22,7 @@ namespace MojtabaBookStore.Models.ViewModels
 
         [Display(Name = "کاربران")]
         public int UsersCount { get; set; }
-        public string RecentRoleName { get; set; }
+        
 
     }
 }

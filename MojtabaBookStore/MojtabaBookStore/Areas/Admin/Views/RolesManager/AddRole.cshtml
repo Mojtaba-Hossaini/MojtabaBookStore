@@ -1,26 +1,20 @@
 ﻿@model RolesViewModel
 @{
     ViewData["Title"] = "اضافه کردن نقش ";
-    
+
 }
+
+
 <div class="row">
     <div class="col-md-12">
         <div class="card">
             <div class="card-header bg-light">
                 افزودن نقش جدید
             </div>
-            @if (ViewBag.Error != null)
-            {
-                <div class="alert alert-danger alert-dismissable">
-                    @ViewBag.Error
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-            }
             <form asp-action="AddRole">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 <div class="row card-body mb-3">
-                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
                     <div class="col-md-7 form-group">
                         <div class="row">
 
@@ -41,17 +35,15 @@
                             </div>
                             <div class="col-md-9">
                                 <textarea asp-for="Description" class="form-control"></textarea>
-                                
                                 <span asp-validation-for="Description" class="text-danger"></span>
                             </div>
                         </div>
                     </div>
-
                     <div class="col-md-7">
                         <div class="col-md-9">
                             <button type="submit" class="btn btn-info float-left">افزودن نقش</button>
                         </div>
-                        
+
                     </div>
                 </div>
             </form>

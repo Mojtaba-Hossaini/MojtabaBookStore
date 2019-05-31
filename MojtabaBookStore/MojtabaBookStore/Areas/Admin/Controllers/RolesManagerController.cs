@@ -41,18 +41,14 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
             if (!ModelState.IsValid)
                 return View(viewModel);
 
-            if (await roleManger.RoleExistsAsync(viewModel.RoleName))
-            {
-                ViewBag.Error = "این نقش تکراری است";
-                return View(viewModel);
-
-            }
-                
-
+            
             var result = await roleManger.CreateAsync(new ApplicationRole(viewModel.RoleName, viewModel.Description));
             if (result.Succeeded)
                 return RedirectToAction("Index");
-            ViewBag.Error = "در ذخیره اطلاعات خطایی رخ داده است";
+            foreach (var item in result.Errors)
+            {
+                ModelState.AddModelError("", item.Description);
+            }
             return View(viewModel);
         }
 
@@ -66,7 +62,7 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
             if (role == null)
                 return NotFound();
 
-            var roleVm = new RolesViewModel { RoleID = role.Id, RoleName = role.Name , Description = role.Description, RecentRoleName = role.Name};
+            var roleVm = new RolesViewModel { RoleID = role.Id, RoleName = role.Name , Description = role.Description};
             return View(roleVm);
 
 
@@ -83,13 +79,7 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
             if (role == null)
                 return NotFound();
 
-            if (await roleManger.RoleExistsAsync(viewModel.RoleName) && viewModel.RecentRoleName != viewModel.RoleName)
-            {
-                ViewBag.Error = "نقش تکراری است";
-                return View(viewModel);
-    
-            }
-
+            
             role.Name = viewModel.RoleName;
             role.Description = viewModel.Description;
             var result = await roleManger.UpdateAsync(role);
@@ -97,10 +87,15 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
             if (result.Succeeded)
             {
                 ViewBag.Success = "ذخیره تغییرات با موقیت انجام شد";
-                return View(viewModel);
+                //return View(viewModel);
             }
 
-            ViewBag.Error = "خطایی در ذخیره تغیرات رخ داده است بعدا تلاش کنید";
+            foreach (var item in result.Errors)
+            {
+                ModelState.AddModelError("", item.Description);
+            }
+
+           
             return View(viewModel);
         }
 
