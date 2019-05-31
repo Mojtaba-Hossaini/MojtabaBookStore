@@ -3,6 +3,8 @@
   "name": "asp.net",
   "private": true,
   "devDependencies": {
-    "select2": "4.0.7"
+    "select2": "4.0.7",
+    "md.bootstrappersiandatetimepicker": "3.4.4"
+    
   }
 }

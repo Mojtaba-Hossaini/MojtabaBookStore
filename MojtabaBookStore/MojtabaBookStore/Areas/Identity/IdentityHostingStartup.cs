@@ -26,7 +26,14 @@ namespace MojtabaBookStore.Areas.Identity
                 services.AddIdentity<ApplicationUser, ApplicationRole>()
                    .AddDefaultUI()
                    .AddEntityFrameworkStores<MojtabaIdentityContext>()
+                   .AddErrorDescriber<ApplicationIdentityErrorDescriber>()
                    .AddDefaultTokenProviders();
+
+                services.Configure<IdentityOptions>(options =>
+                {
+                    options.Password.RequireUppercase = false;
+                    options.Password.RequiredLength = 8;
+                });
             });
         }
     }
