@@ -23,7 +23,7 @@ namespace MojtabaBookStore.Areas.Identity
                 //services.AddDefaultIdentity<MojtabaBookStoreUser>()
                 //    .AddEntityFrameworkStores<MojtabaIdentityContext>();
 
-                services.AddIdentity<MojtabaBookStoreUser, ApplicationRole>()
+                services.AddIdentity<ApplicationUser, ApplicationRole>()
                    .AddDefaultUI()
                    .AddEntityFrameworkStores<MojtabaIdentityContext>()
                    .AddDefaultTokenProviders();

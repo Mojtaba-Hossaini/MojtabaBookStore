@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MojtabaBookStore.Models;
 
 namespace MojtabaBookStore.Migrations.MojtabaIdentity
 {
     [DbContext(typeof(MojtabaIdentityContext))]
-    partial class MojtabaIdentityContextModelSnapshot : ModelSnapshot
+    [Migration("20190530163742_Update_AspNetUser_Rename")]
+    partial class Update_AspNetUser_Rename
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -180,7 +182,7 @@ namespace MojtabaBookStore.Migrations.MojtabaIdentity
                         .HasName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
-                    b.ToTable("AppUsers");
+                    b.ToTable("AspNetUsers");
                 });
 
             modelBuilder.Entity("MojtabaBookStore.Areas.Identity.Data.ApplicationUserRole", b =>
@@ -235,8 +237,8 @@ namespace MojtabaBookStore.Migrations.MojtabaIdentity
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("MojtabaBookStore.Areas.Identity.Data.ApplicationUser", "User")
-                        .WithMany("Roles")
+                    b.HasOne("MojtabaBookStore.Areas.Identity.Data.ApplicationUser")
+                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });

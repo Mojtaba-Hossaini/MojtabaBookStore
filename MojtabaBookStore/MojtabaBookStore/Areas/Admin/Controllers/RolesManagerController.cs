@@ -66,7 +66,7 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
             if (role == null)
                 return NotFound();
 
-            var roleVm = new RolesViewModel { RoleID = role.Id, RoleName = role.Name , Description = role.Description};
+            var roleVm = new RolesViewModel { RoleID = role.Id, RoleName = role.Name , Description = role.Description, RecentRoleName = role.Name};
             return View(roleVm);
 
 
@@ -83,7 +83,7 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
             if (role == null)
                 return NotFound();
 
-            if (await roleManger.RoleExistsAsync(viewModel.RoleName))
+            if (await roleManger.RoleExistsAsync(viewModel.RoleName) && viewModel.RecentRoleName != viewModel.RoleName)
             {
                 ViewBag.Error = "نقش تکراری است";
                 return View(viewModel);

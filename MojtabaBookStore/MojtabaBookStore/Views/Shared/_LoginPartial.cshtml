@@ -1,7 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @using MojtabaBookStore.Areas.Identity.Data
-@inject SignInManager<MojtabaBookStoreUser> SignInManager
-@inject UserManager<MojtabaBookStoreUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
 
 @if (SignInManager.IsSignedIn(User))
 {
