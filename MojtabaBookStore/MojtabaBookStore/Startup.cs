@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -14,6 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Localization;
 using MojtabaBookStore.Areas.Identity.Data;
+using MojtabaBookStore.Areas.Identity.Services;
 using MojtabaBookStore.Models;
 using MojtabaBookStore.Models.Repository;
 using MojtabaBookStore.Models.UnitOfWork;
@@ -48,6 +50,7 @@ namespace MojtabaBookStore
             services.AddScoped<IApplicationRoleManager, ApplicationRoleManager>();
             services.AddScoped<IApplicationUserManager, ApplicationUserManager>();
             services.AddScoped<ApplicationIdentityErrorDescriber>();
+            services.AddScoped<IEmailSender, EmailSender>();
             services.AddDbContext<BookStoreDb>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddLocalization(options => { options.ResourcesPath = "Resources"; });
             services.AddMvc(options =>

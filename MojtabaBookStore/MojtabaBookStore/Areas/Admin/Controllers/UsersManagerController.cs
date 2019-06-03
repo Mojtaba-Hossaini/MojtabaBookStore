@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using MojtabaBookStore.Areas.Identity.Data;
 using MojtabaBookStore.Models.ViewModels.UsersManager;
@@ -17,17 +18,22 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
         private readonly IApplicationUserManager userManager;
         private readonly IApplicationRoleManager roleManager;
         private readonly IConvertDate convertDate;
+        private readonly IEmailSender emailSender;
 
-        public UsersManagerController(IApplicationUserManager userManager, IApplicationRoleManager roleManager, IConvertDate convertDate)
+        public UsersManagerController(IApplicationUserManager userManager, IApplicationRoleManager roleManager, IConvertDate convertDate, IEmailSender emailSender)
         {
             this.userManager = userManager;
             this.roleManager = roleManager;
             this.convertDate = convertDate;
+            this.emailSender = emailSender;
         }
         public async Task<IActionResult> Index(string Msg, int page = 1, int row =10)
         {
             if (Msg == "Success")
                 ViewBag.Alert = "عضویت با موفقیت انجام شد";
+
+            if (Msg == "SendEmailSuccess")
+                ViewBag.Alert = "ارسال ایمیل با موفقیت انجام شد";
 
             var pagingModel = PagingList.Create(await userManager.GetAllUsersWithRolesAsync(), row, page);
             return View(pagingModel);
@@ -55,7 +61,10 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
                 return NotFound();
 
             ViewBag.AllRoles = roleManager.GetAllRoles();
-            user.PersianBirthDate = convertDate.MiladiToShamsi(user.BirthDate, "yyyy/MM/dd");
+
+            if(user.BirthDate != null)
+                user.PersianBirthDate = convertDate.MiladiToShamsi((DateTime)user.BirthDate, "yyyy/MM/dd");
+
             return View(user);
 
         }
@@ -145,6 +154,21 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
                 return View(User);
             }
         }
+
+        public async Task<IActionResult> SendEmail(string[] emails, string subject, string message)
+        {
+            if (emails != null)
+            {
+                for (int i = 0; i < emails.Length; i++)
+                {
+                    await emailSender.SendEmailAsync(emails[i], subject, message);
+                }
+                return RedirectToAction("Index", new { Msg = "SendEmailSuccess" }); ;
+            }
+            return RedirectToAction("Index");
+        }
+
+
 
 
     }
