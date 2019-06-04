@@ -94,7 +94,8 @@ namespace MojtabaBookStore.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SignIn(SignInViewModel viewModel)
         {
-            
+            if (Captcha.ValidateCaptchaCode(viewModel.CaptchaCode,HttpContext))
+            {
                 if (ModelState.IsValid)
                 {
                     var result = await signInManager.PasswordSignInAsync(viewModel.UserName, viewModel.Password, viewModel.RememberMe, false);
@@ -105,7 +106,11 @@ namespace MojtabaBookStore.Controllers
 
                 }
 
-            
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, "کد امنیتی وارد شده درست نیست ");
+            }
             return View();
         }
 
