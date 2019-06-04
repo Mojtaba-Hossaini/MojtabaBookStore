@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MojtabaBookStore.Models.ViewModels.AccountViewModel
 {
-    public class RegisterViewModel
+    public class RegisterViewModel : GoogleRecaptchaModelBase
     {
         [Required(ErrorMessage = "وارد نمودن {0} الزامی است.")]
         [EmailAddress(ErrorMessage = "ایمیل شما نامعتبر است.")]
