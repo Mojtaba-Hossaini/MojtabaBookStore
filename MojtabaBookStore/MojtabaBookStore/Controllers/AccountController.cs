@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using MojtabaBookStore.Areas.Identity.Data;
 using MojtabaBookStore.Models.ViewModels.AccountViewModel;
+using MojtabaBookStore.Services;
 
 namespace MojtabaBookStore.Controllers
 {
@@ -16,12 +19,14 @@ namespace MojtabaBookStore.Controllers
         private readonly IApplicationRoleManager roleManager;
         private readonly IApplicationUserManager userManager;
         private readonly IEmailSender emailSender;
+        private readonly SignInManager<ApplicationUser> signInManager;
 
-        public AccountController(IApplicationRoleManager roleManager, IApplicationUserManager userManager, IEmailSender emailSender)
+        public AccountController(IApplicationRoleManager roleManager, IApplicationUserManager userManager, IEmailSender emailSender, SignInManager<ApplicationUser> signInManager)
         {
             this.roleManager = roleManager;
             this.userManager = userManager;
             this.emailSender = emailSender;
+            this.signInManager = signInManager;
         }
 
         [HttpGet]
@@ -30,6 +35,8 @@ namespace MojtabaBookStore.Controllers
             return View();
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel viewModel)
         {
             if (!ModelState.IsValid)
@@ -75,6 +82,57 @@ namespace MojtabaBookStore.Controllers
             if (!result.Succeeded)
                 throw new InvalidOperationException($"در تایید ایمیل کاربری با آی دی '{userId}' مشکلی به وجود آمد ");
             return View();
+        }
+
+        [HttpGet]
+        public IActionResult SignIn()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SignIn(SignInViewModel viewModel)
+        {
+            if (Captcha.ValidateCaptchaCode(viewModel.CaptchaCode,HttpContext))
+            {
+                if (ModelState.IsValid)
+                {
+                    var result = await signInManager.PasswordSignInAsync(viewModel.UserName, viewModel.Password, viewModel.RememberMe, false);
+                    if (result.Succeeded)
+                        return RedirectToAction("Index", "Home");
+
+                    ModelState.AddModelError(string.Empty, "نام کاربری یا کلمه عبور شما درست نیست");
+
+                }
+
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, "کد امنیتی وارد شده درست نیست ");
+            }
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SignOut()
+        {
+            await signInManager.SignOutAsync();
+            return RedirectToAction("Index", "Home");
+        }
+
+
+        [Route("get-captcha-image")]
+        public IActionResult GetCaptchaImage()
+        {
+            int width = 100;
+            int height = 36;
+            var captchaCode = Captcha.GenerateCaptchaCode();
+            var result = Captcha.GenerateCaptchaImage(width, height, captchaCode);
+            HttpContext.Session.SetString("CaptchaCode", result.CaptchaCode);
+            Stream s = new MemoryStream(result.CaptchaByteData);
+            return new FileStreamResult(s, "image/png");
         }
     }
 }

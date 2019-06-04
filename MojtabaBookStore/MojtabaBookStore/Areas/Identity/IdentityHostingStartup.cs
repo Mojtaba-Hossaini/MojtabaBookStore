@@ -33,6 +33,7 @@ namespace MojtabaBookStore.Areas.Identity
                 {
                     options.Password.RequireUppercase = false;
                     options.Password.RequiredLength = 8;
+                    options.SignIn.RequireConfirmedEmail = true;
                 });
             });
         }

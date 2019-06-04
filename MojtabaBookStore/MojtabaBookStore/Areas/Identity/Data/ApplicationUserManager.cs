@@ -6,6 +6,7 @@ using MojtabaBookStore.Models.ViewModels.UsersManager;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -94,6 +95,12 @@ namespace MojtabaBookStore.Areas.Identity.Data
                 TwoFactorEnabled = user.TwoFactorEnabled,
 
             }).FirstOrDefaultAsync();
+        }
+
+        public async Task<string> GetFullName(ClaimsPrincipal user)
+        {
+            var userInfo = await GetUserAsync(user);
+            return userInfo.FirstName + " " + userInfo.LastName;
         }
     }
 }
