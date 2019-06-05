@@ -8,7 +8,7 @@
     <form asp-action="SignOut" asp-controller="Account" method="post" id="logoutForm" class="navbar-right">
         <ul class="navbar-nav mt-2 mt-lg-0">
             <li class="nav-item">
-                <a title="Manage" class="nav-link text-white">سلام  @UserManager.GetUserName(User)!</a>
+                <a title="Manage" class="nav-link text-white">سلام  <span class="text-danger m-2">@UserManager.GetUserName(User)   </span></a>
             </li>
             <li>
                 <button type="submit" class="btn btn-link navbar-btn navbar-link nav-link text-white">خروج</button>

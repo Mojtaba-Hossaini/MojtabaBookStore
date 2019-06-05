@@ -34,6 +34,8 @@ namespace MojtabaBookStore.Areas.Identity
                     options.Password.RequireUppercase = false;
                     options.Password.RequiredLength = 8;
                     options.SignIn.RequireConfirmedEmail = true;
+                    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(20);
+                    options.Lockout.MaxFailedAccessAttempts = 3;
                 });
             });
         }

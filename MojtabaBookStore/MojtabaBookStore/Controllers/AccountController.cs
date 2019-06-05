@@ -97,9 +97,15 @@ namespace MojtabaBookStore.Controllers
             
                 if (ModelState.IsValid)
                 {
-                    var result = await signInManager.PasswordSignInAsync(viewModel.UserName, viewModel.Password, viewModel.RememberMe, false);
+                    var result = await signInManager.PasswordSignInAsync(viewModel.UserName, viewModel.Password, viewModel.RememberMe, true);
                     if (result.Succeeded)
                         return RedirectToAction("Index", "Home");
+                if (result.IsLockedOut)
+                {
+                    ModelState.AddModelError(string.Empty,"حساب کاربری شما به علت تلاش های ناموفق در ورود به مدت ۲۰ دقیقه قفل میباشد. بعدا تلاش کنید");
+                    return View();
+                       
+                }
 
                     ModelState.AddModelError(string.Empty, "نام کاربری یا کلمه عبور شما درست نیست");
 
@@ -129,5 +135,96 @@ namespace MojtabaBookStore.Controllers
             Stream s = new MemoryStream(result.CaptchaByteData);
             return new FileStreamResult(s, "image/png");
         }
+
+        [HttpGet]
+        public IActionResult ForgetPassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgetPassword(ForgetPasswordViewModel viewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await userManager.FindByEmailAsync(viewModel.Email);
+                if (user == null)
+                {
+                    ModelState.AddModelError(string.Empty, "ایمیل شما صحیح نمی باشد.");
+                    return View();
+                }
+
+                if (!await userManager.IsEmailConfirmedAsync(user))
+                {
+                    ModelState.AddModelError(string.Empty, "لطفا با تایید ایمیل حساب کاربری خود را فعال کنید.");
+                    return View();
+                }
+
+                var Code = await userManager.GeneratePasswordResetTokenAsync(user);
+                var CallbackUrl = Url.Action("ResetPassword", "Account", values: new { Code }, protocol: Request.Scheme);
+                await emailSender.SendEmailAsync(viewModel.Email, "بازیابی کلمه عبور", $"<p style='font-family:tahoma;font-size:14px'>برای بازنشانی کلمه عبور خود <a href='{HtmlEncoder.Default.Encode(CallbackUrl)}'>اینجا کلیک کنید</a></p>");
+
+                return RedirectToAction("ForgetPasswordConfirmation");
+            }
+
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult ForgetPasswordConfirmation()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult ResetPassword(string code = null)
+        {
+            if (code == null)
+                return NotFound();
+            else
+            {
+                var ViewModel = new ResetPasswordViewModel { Code = code };
+                return View(ViewModel);
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel viewModel)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View();
+            }
+            else
+            {
+                var user = await userManager.FindByEmailAsync(viewModel.Email);
+                if (user == null)
+                {
+                    ModelState.AddModelError(string.Empty, "ایمیل شما صحیح نمی باشد.");
+                    return View();
+                }
+                var Result = await userManager.ResetPasswordAsync(user, viewModel.Code, viewModel.Password);
+                if (Result.Succeeded)
+                {
+                    return RedirectToAction("ResetPasswordConfirmation");
+                }
+
+                foreach (var error in Result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+
+                return View();
+            }
+        }
+
+        [HttpGet]
+        public IActionResult ResetPasswordConfirmation()
+        {
+            return View();
+        }
+
     }
 }
