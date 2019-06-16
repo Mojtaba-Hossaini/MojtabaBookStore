@@ -168,6 +168,182 @@ namespace MojtabaBookStore.Areas.Admin.Controllers
             return RedirectToAction("Index");
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangeLockOutEnable(string userId, bool status)
+        {
+            var user = await userManager.FindByIdAsync(userId);
+            if (user == null)
+                return NotFound();
+
+            await userManager.SetLockoutEnabledAsync(user, status);
+            return RedirectToAction("Details", new { id = userId });
+
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> LockUserAccount(string userId)
+        {
+            var user = await userManager.FindByIdAsync(userId);
+            if (user == null)
+                return NotFound();
+
+            await userManager.SetLockoutEndDateAsync(user, DateTimeOffset.UtcNow.AddMinutes(20));
+            return RedirectToAction("Details", new { id = userId });
+
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UnLockUserAccount(string userId)
+        {
+            var user = await userManager.FindByIdAsync(userId);
+            if (user == null)
+                return NotFound();
+
+            await userManager.SetLockoutEndDateAsync(user, null);
+            return RedirectToAction("Details", new { id = userId });
+
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ActiveOrDeactiveUser(string userId, bool status)
+        {
+            var user = await userManager.FindByIdAsync(userId);
+            if (user == null)
+                return NotFound();
+
+            user.IsActive = status;
+            await userManager.UpdateAsync(user);
+            return RedirectToAction("Details", new { id = userId });
+
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ResetPassword(string userId)
+        {
+            var user = await userManager.FindByIdAsync(userId);
+            if (user == null)
+                return NotFound();
+            var viewModel = new UserResetPasswordViewModel
+            {
+                Id = userId,
+                UserName = user.UserName,
+                Email = user.Email
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(UserResetPasswordViewModel viewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await userManager.FindByIdAsync(viewModel.Id);
+                if (user == null)
+                    return NotFound();
+
+                await userManager.RemovePasswordAsync(user);
+                await userManager.AddPasswordAsync(user, viewModel.NewPassword);
+                ViewBag.AlertSuccess = "رمز عبور کاربر با موفقیت ریست شد";
+                viewModel.UserName = user.UserName;
+                viewModel.Email = user.Email;
+
+            }
+            return View(viewModel);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangeTwoFactorEnalbed(string userId)
+        {
+            var user = await userManager.FindByIdAsync(userId);
+            if (user == null)
+                return NotFound();
+
+            if (user.TwoFactorEnabled)
+                user.TwoFactorEnabled = false;
+            else
+                user.TwoFactorEnabled = true;
+
+            var result = await userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+            {
+                foreach (var item in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, item.Description);
+                }
+            }
+            return RedirectToAction("Details", new { id = userId });
+            
+
+
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangeEmailConfirmed(string userId)
+        {
+            var user = await userManager.FindByIdAsync(userId);
+            if (user == null)
+                return NotFound();
+
+            if (user.EmailConfirmed)
+                user.EmailConfirmed = false;
+            else
+                user.EmailConfirmed = true;
+
+            var result = await userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+            {
+                foreach (var item in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, item.Description);
+                }
+            }
+            return RedirectToAction("Details", new { id = userId });
+
+
+
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePhoneNumberConfirmed(string userId)
+        {
+            var user = await userManager.FindByIdAsync(userId);
+            if (user == null)
+                return NotFound();
+
+            if (user.PhoneNumberConfirmed)
+                user.PhoneNumberConfirmed = false;
+            else
+                user.PhoneNumberConfirmed = true;
+
+            var result = await userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+            {
+                foreach (var item in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, item.Description);
+                }
+            }
+            return RedirectToAction("Details", new { id = userId });
+
+
+
+        }
+
+
+
+
+
 
 
 

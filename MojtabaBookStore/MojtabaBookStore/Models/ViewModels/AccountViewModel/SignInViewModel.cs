@@ -2,7 +2,7 @@
 
 namespace MojtabaBookStore.Models.ViewModels.AccountViewModel
 {
-    public class SignInViewModel : GoogleRecaptchaModelBase
+    public class SignInViewModel //: GoogleRecaptchaModelBase
     {
         [Required(ErrorMessage = "وارد نمودن {0} الزامی است.")]
         [Display(Name = "نام کاربری")]
@@ -16,9 +16,9 @@ namespace MojtabaBookStore.Models.ViewModels.AccountViewModel
         [Display(Name = "مرا به خاطر بسپار؟")]
         public bool RememberMe { get; set; }
 
-        //[Required(ErrorMessage = "وارد نمودن {0} الزامی است.")]
-        //[StringLength(4, ErrorMessage = "کد امنیتی باید دارای 4 کاراکتر باشد.")]
-        //[Display(Name = "کد امنیتی")]
-        //public string CaptchaCode { get; set; }
+        [Required(ErrorMessage = "وارد نمودن {0} الزامی است.")]
+        [StringLength(4, ErrorMessage = "کد امنیتی باید دارای 4 کاراکتر باشد.")]
+        [Display(Name = "کد امنیتی")]
+        public string CaptchaCode { get; set; }
     }
 }

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using MojtabaBookStore.Areas.Identity.Data;
 using MojtabaBookStore.Models.ViewModels.AccountViewModel;
 using MojtabaBookStore.Services;
@@ -94,24 +95,41 @@ namespace MojtabaBookStore.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SignIn(SignInViewModel viewModel)
         {
-            
+
+
+            if (Captcha.ValidateCaptchaCode(viewModel.CaptchaCode, HttpContext))
+            {
                 if (ModelState.IsValid)
                 {
-                    var result = await signInManager.PasswordSignInAsync(viewModel.UserName, viewModel.Password, viewModel.RememberMe, true);
-                    if (result.Succeeded)
-                        return RedirectToAction("Index", "Home");
-                if (result.IsLockedOut)
-                {
-                    ModelState.AddModelError(string.Empty,"حساب کاربری شما به علت تلاش های ناموفق در ورود به مدت ۲۰ دقیقه قفل میباشد. بعدا تلاش کنید");
-                    return View();
-                       
-                }
+                    var user = await userManager.FindByNameAsync(viewModel.UserName);
+                    if (user == null)
+                        return NotFound();
+                    if (user.IsActive)
+                    {
+                        var result = await signInManager.PasswordSignInAsync(viewModel.UserName, viewModel.Password, viewModel.RememberMe, true);
+                        if (result.Succeeded)
+                            return RedirectToAction("Index", "Home");
+                        if (result.IsLockedOut)
+                        {
+                            ModelState.AddModelError(string.Empty, "حساب کاربری شما به علت تلاش های ناموفق در ورود به مدت ۲۰ دقیقه قفل میباشد. بعدا تلاش کنید");
+                            return View();
+
+                        }
+                        if (result.RequiresTwoFactor)
+                            return RedirectToAction("Sendcode", new { rememeberMe = viewModel.RememberMe });
+
+                    }
+
+
 
                     ModelState.AddModelError(string.Empty, "نام کاربری یا کلمه عبور شما درست نیست");
 
                 }
+            }
+            else
+                ModelState.AddModelError(string.Empty, "کد امنیتی وارد شده درست نیست");
 
-            
+
             return View();
         }
 
@@ -224,6 +242,71 @@ namespace MojtabaBookStore.Controllers
         public IActionResult ResetPasswordConfirmation()
         {
             return View();
+        }
+
+        public async Task<IActionResult> SendCode(bool rememberMe)
+        {
+            var user = await signInManager.GetTwoFactorAuthenticationUserAsync();
+            if (user == null)
+                return NotFound();
+
+            var userFactor = await userManager.GetValidTwoFactorProvidersAsync(user);
+            var factorOptoins = userFactor.Select(p => new SelectListItem { Text = (p == "Email"?"ایمیل" : p), Value = p }).ToList();
+            return View(new SendCodeViewModel { Providers = factorOptoins, RememberMe = rememberMe });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SendCode(SendCodeViewModel viewModel)
+        {
+            if (!ModelState.IsValid)
+                return View(viewModel);
+            var user = await signInManager.GetTwoFactorAuthenticationUserAsync();
+            if (user == null)
+                return NotFound();
+
+            var code = await userManager.GenerateTwoFactorTokenAsync(user, viewModel.SelectedProvider);
+            if (string.IsNullOrWhiteSpace(code))
+                return View("Error");
+
+            var message = "<p style='direction:rtl;font-size:14px;font-family:tahoma'>کد اعتبارسنجی شما :" + code + "</p>";
+            if (viewModel.SelectedProvider == "Email")
+                await emailSender.SendEmailAsync(user.Email, "کد اعتبار سنجی فروشگاه کتاب مجتبی", message);
+
+            return RedirectToAction("VerifyCode", new { provider = viewModel.SelectedProvider, rememberMe = viewModel.RememberMe });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> VerifyCode(string provider, bool rememberMe)
+        {
+            var user = await signInManager.GetTwoFactorAuthenticationUserAsync();
+            if (user == null)
+                return NotFound();
+
+            return View(new VerifyCodeViewModel { Provider = provider, RememberMe = rememberMe });
+
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> VerifyCode(VerifyCodeViewModel viewModel)
+        {
+            if (!ModelState.IsValid)
+                return View(viewModel);
+
+            var result = await signInManager.TwoFactorSignInAsync(viewModel.Provider, viewModel.Code, viewModel.RememberMe, viewModel.RememberBrowser);
+            if (result.Succeeded)
+                return RedirectToAction("Index", "Home");
+            else if (result.IsLockedOut)
+                ModelState.AddModelError(string.Empty, "حساب کاربری شما به مدت ۲۰ دقیقه قفل میباشد");
+            else
+                ModelState.AddModelError(string.Empty, "کد وارد شده درست نیست");
+
+            return View(viewModel);
+
+
+
+
         }
 
     }
