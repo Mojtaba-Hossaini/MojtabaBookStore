@@ -102,5 +102,7 @@ namespace MojtabaBookStore.Areas.Identity.Data
             var userInfo = await GetUserAsync(user);
             return userInfo.FirstName + " " + userInfo.LastName;
         }
+
+        
     }
 }

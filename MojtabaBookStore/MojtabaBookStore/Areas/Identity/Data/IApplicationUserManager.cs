@@ -120,6 +120,7 @@ namespace MojtabaBookStore.Areas.Identity.Data
         Task<List<UsersViewModel>> GetAllUsersWithRolesAsync();
         Task<UsersViewModel> FindUserWithRolesByIdAsync(string UserID);
         Task<string> GetFullName(ClaimsPrincipal user);
+        Task<ApplicationUser> GetUserAsync(ClaimsPrincipal user);
         #endregion
     }
 }
