@@ -68,6 +68,10 @@ namespace MojtabaBookStore
                  (x) => L["انتخاب یکی از موارد لیست الزامی است."]);
 
             }).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = "/Account/SignIn";
+            });
             services.AddPaging(options => {
                 options.ViewName = "Bootstrap4";
                 options.HtmlIndicatorDown = "<i class='fa fa-sort-amount-down'></i>";

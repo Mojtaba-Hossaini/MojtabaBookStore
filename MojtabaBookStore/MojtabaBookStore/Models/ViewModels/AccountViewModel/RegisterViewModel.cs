@@ -15,6 +15,10 @@ namespace MojtabaBookStore.Models.ViewModels.AccountViewModel
         public string Email { get; set; }
 
         [Required(ErrorMessage = "وارد نمودن {0} الزامی است.")]
+        [Display(Name = "تاریخ تولد")]
+        public string BirthDate { get; set; }
+
+        [Required(ErrorMessage = "وارد نمودن {0} الزامی است.")]
         [StringLength(100, ErrorMessage = "{0} باید دارای حداقل {2} کاراکتر و حداکثر دارای {1} کاراکتر باشد.", MinimumLength = 6)]
         [DataType(DataType.Password)]
         [Display(Name = "کلمه عبور")]

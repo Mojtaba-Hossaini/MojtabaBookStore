@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Claims;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -21,13 +23,15 @@ namespace MojtabaBookStore.Controllers
         private readonly IApplicationUserManager userManager;
         private readonly IEmailSender emailSender;
         private readonly SignInManager<ApplicationUser> signInManager;
+        private readonly ConvertDate convertDate;
 
-        public AccountController(IApplicationRoleManager roleManager, IApplicationUserManager userManager, IEmailSender emailSender, SignInManager<ApplicationUser> signInManager)
+        public AccountController(IApplicationRoleManager roleManager, IApplicationUserManager userManager, IEmailSender emailSender, SignInManager<ApplicationUser> signInManager, ConvertDate convertDate)
         {
             this.roleManager = roleManager;
             this.userManager = userManager;
             this.emailSender = emailSender;
             this.signInManager = signInManager;
+            this.convertDate = convertDate;
         }
 
         [HttpGet]
@@ -40,31 +44,37 @@ namespace MojtabaBookStore.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel viewModel)
         {
-            if (!ModelState.IsValid)
-                return View(viewModel);
-
-            var user = new ApplicationUser { UserName = viewModel.UserName, Email = viewModel.Email, PhoneNumber = viewModel.PhoneNumber, RegisterDate = DateTime.Now, IsActive = true };
-            IdentityResult result = await userManager.CreateAsync(user, viewModel.Password);
-
-            if (result.Succeeded)
+            if (ModelState.IsValid)
             {
-                var role = roleManager.FindByNameAsync("کاربر");
-                if (role == null)
-                    await roleManager.CreateAsync(new ApplicationRole("کاربر"));
+                DateTime BirthDateMiladi = convertDate.ShamsiToMiladi(viewModel.BirthDate);
 
-                result = await userManager.AddToRoleAsync(user, "کاربر");
+                var user = new ApplicationUser { UserName = viewModel.UserName, Email = viewModel.Email, PhoneNumber = viewModel.PhoneNumber, RegisterDate = DateTime.Now, IsActive = true, BirthDate = BirthDateMiladi };
+                IdentityResult result = await userManager.CreateAsync(user, viewModel.Password);
+
                 if (result.Succeeded)
                 {
-                    var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
-                    var calBackUrl = Url.Action("ConfirmEmail", "Account", values: new { userId = user.Id, code = code }, Request.Scheme);
-                    await emailSender.SendEmailAsync(user.Email, "تایید حساب کاربری - فروشگاه کتاب مجتبی", $"<div dir='rtl' style='font-family:tahoma;font-size:14px'>لطفا با کلیک روی لینک رویه رو ایمیل خود را تایید کنید.  <a href='{HtmlEncoder.Default.Encode(calBackUrl)}'>کلیک کنید</a></div>");
+                    var role = await roleManager.FindByNameAsync("کاربر");
+                    if (role == null)
+                        await roleManager.CreateAsync(new ApplicationRole("کاربر"));
 
-                    return RedirectToAction("Index", "Home", new { id = "ConfirmEmail" });
+                    result = await userManager.AddToRoleAsync(user, "کاربر");
+                    await userManager.AddClaimAsync(user, new Claim(ClaimTypes.DateOfBirth, BirthDateMiladi.ToString("MM/dd")));
+
+                    if (result.Succeeded)
+                    {
+                        var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
+                        var callbackUrl = Url.Action("ConfirmEmail", "Account", values: new { userId = user.Id, code = code }, protocol: Request.Scheme);
+
+                        await emailSender.SendEmailAsync(viewModel.Email, "تایید ایمیل حساب کاربری - سایت میزفا", $"<div dir='rtl' style='font-family:tahoma;font-size:14px'>لطفا با کلیک روی لینک رویه رو ایمیل خود را تایید کنید.  <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>کلیک کنید</a></div>");
+
+                        return RedirectToAction("Index", "Home", new { id = "ConfirmEmail" });
+                    }
                 }
-            }
-            foreach (var item in result.Errors)
-            {
-                ModelState.AddModelError(string.Empty, item.Description);
+
+                foreach (var item in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, item.Description);
+                }
             }
 
             return View();
@@ -359,6 +369,7 @@ namespace MojtabaBookStore.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> ChangePassword()
         {
             var user = await userManager.GetUserAsync(User);
@@ -440,6 +451,11 @@ namespace MojtabaBookStore.Controllers
                 ModelState.AddModelError(string.Empty, "کد بازیابی شما نامعتبر است.");
 
             return View(viewModel);
+        }
+
+        public IActionResult AccessDenied(string returnUrl = null)
+        {
+            return View();
         }
 
     }

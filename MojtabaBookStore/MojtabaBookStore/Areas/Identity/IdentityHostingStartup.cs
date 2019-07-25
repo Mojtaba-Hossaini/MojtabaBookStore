@@ -24,7 +24,6 @@ namespace MojtabaBookStore.Areas.Identity
                 //    .AddEntityFrameworkStores<MojtabaIdentityContext>();
 
                 services.AddIdentity<ApplicationUser, ApplicationRole>()
-                   .AddDefaultUI()
                    .AddEntityFrameworkStores<MojtabaIdentityContext>()
                    .AddErrorDescriber<ApplicationIdentityErrorDescriber>()
                    .AddDefaultTokenProviders();
